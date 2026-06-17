@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enrolled Beneficiaries</title>
+</head>
+<body>
+
+<h1>Enrolled Beneficiaries</h1>
+
+<table border="1">
+
+<tr>
+    <th>Name</th>
+    <th>Status</th>
+</tr>
+
+{% for beneficiary in beneficiaries %}
+
+<tr>
+    <td>{{ beneficiary.name }}</td>
+    <td>{{ beneficiary.status }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

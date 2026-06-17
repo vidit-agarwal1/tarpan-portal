@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verified Applications</title>
+</head>
+<body>
+
+<h1>Verified Applications</h1>
+
+<table border="1">
+
+<tr>
+    <th>Name</th>
+    <th>Status</th>
+</tr>
+
+{% for application in applications %}
+
+<tr>
+    <td>{{ application.name }}</td>
+    <td>{{ application.status }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>
