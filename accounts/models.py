@@ -14,6 +14,22 @@ class Beneficiary(models.Model):
 
     education = models.CharField(max_length=100)
 
+    date_of_birth = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    address = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    category = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
     enrollment_id = models.CharField(
         max_length=50,
         blank=True,
@@ -36,5 +52,5 @@ class Beneficiary(models.Model):
         default='ENQUIRY'
     )
 
-    def __str__(self):
-        return self.name
+def __str__(self):
+    return self.name
