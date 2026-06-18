@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Admission - Educational Information</title>
+</head>
+<body>
+
+<h1>Step 2 - Educational Information</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+
+<label>College / Institution Name:</label><br>
+<input type="text" name="college_name"><br><br>
+
+<label>Course Name:</label><br>
+<input type="text" name="course_name"><br><br>
+
+<label>Academic Year:</label><br>
+<input type="text" name="academic_year"><br><br>
+
+<label>Education Level:</label><br>
+<input type="text" name="education_level"><br><br>
+
+<button type="submit">Next</button>
+
+
+</form>
+
+</body>
+</html>

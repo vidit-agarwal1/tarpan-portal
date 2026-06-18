@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Admission - Support Information</title>
+</head>
+<body>
+
+<h1>Step 3 - Financial Assistance & Support</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+
+<label>Type of Support Required:</label><br>
+<input type="text" name="support_required"><br><br>
+
+<label>Family Annual Income:</label><br>
+<input type="number" name="family_income"><br><br>
+
+<label>Reason for Assistance:</label><br>
+<textarea name="reason"></textarea><br><br>
+
+<button type="submit">Review Application</button>
+
+
+</form>
+
+</body>
+</html>

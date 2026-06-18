@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Admission - Personal Information</title>
+</head>
+<body>
+
+<h1>Step 1 - Personal Information</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+
+<label>Full Name:</label><br>
+<input type="text" name="name"><br><br>
+
+<label>Phone:</label><br>
+<input type="text" name="phone"><br><br>
+
+<label>Email:</label><br>
+<input type="email" name="email"><br><br>
+
+<label>Gender:</label><br>
+<input type="text" name="gender"><br><br>
+
+<label>Date of Birth:</label><br>
+<input type="date" name="dob"><br><br>
+
+<label>Address:</label><br>
+<textarea name="address"></textarea><br><br>
+
+<label>District:</label><br>
+<input type="text" name="district"><br><br>
+
+<label>Category:</label><br>
+<input type="text" name="category"><br><br>
+
+<button type="submit">Next</button>
+
+
+</form>
+
+</body>
+</html>

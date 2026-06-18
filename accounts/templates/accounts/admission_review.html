@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Review Application</title>
+</head>
+<body>
+
+<h1>Step 4 - Review Application</h1>
+
+<h3>Personal Information</h3>
+
+<p><strong>Name:</strong> {{ data.name }}</p>
+<p><strong>Phone:</strong> {{ data.phone }}</p>
+<p><strong>Email:</strong> {{ data.email }}</p>
+<p><strong>District:</strong> {{ data.district }}</p>
+
+<h3>Educational Information</h3>
+
+<p><strong>College:</strong> {{ data.college_name }}</p>
+<p><strong>Course:</strong> {{ data.course_name }}</p>
+<p><strong>Academic Year:</strong> {{ data.academic_year }}</p>
+
+<h3>Support Information</h3>
+
+<p><strong>Support Required:</strong> {{ data.support_required }}</p>
+<p><strong>Family Income:</strong> {{ data.family_income }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">
+        Submit Application
+    </button>
+</form>
+
+</body>
+</html>

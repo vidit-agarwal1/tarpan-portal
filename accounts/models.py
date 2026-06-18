@@ -54,3 +54,37 @@ class Beneficiary(models.Model):
 
 def __str__(self):
     return self.name
+
+class AdmissionApplication(models.Model):
+
+    beneficiary = models.OneToOneField(
+        Beneficiary,
+        on_delete=models.CASCADE
+    )
+
+    family_income = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+
+    reason = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    college_name = models.CharField(max_length=200)
+
+    course_name = models.CharField(max_length=200)
+
+    academic_year = models.CharField(max_length=50)
+
+    application_date = models.DateField()
+
+    support_required = models.TextField()
+
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.beneficiary.name} - {self.course_name}"

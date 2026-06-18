@@ -28,4 +28,10 @@ path(
     name='enrolled_beneficiaries'
 ),
 
+path('admission/personal/', views.admission_personal, name='admission_personal'),
+path('admission/education/', views.admission_education, name='admission_education'),
+path('admission/support/', views.admission_support, name='admission_support'),
+path('admission/review/', views.admission_review, name='admission_review'),
+
+
 ]
