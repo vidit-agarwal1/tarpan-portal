@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>Admin Dashboard</title>
@@ -7,7 +8,17 @@
 
 <h1>Tarpan Admin Dashboard</h1>
 
-<h2>Total Beneficiaries: {{ total_beneficiaries }}</h2>
+<hr>
+
+<h2>Overview</h2>
+
+<p>Total Beneficiaries: {{ total_beneficiaries }}</p>
+
+<p>Admission Applications: {{ applied_count }}</p>
+
+<p>Verified Applications: {{ verified_count }}</p>
+
+<p>Enrolled Beneficiaries: {{ enrolled_count }}</p>
 
 <hr>
 
@@ -16,9 +27,12 @@
 <ul>
     <li><a href="/admission-applications/">Admission Applications</a></li>
 
-    <li><a href="/verified-applications/">Verified Applications</a></li>
+```
+<li><a href="/verified-applications/">Verified Applications</a></li>
 
-    <li><a href="/enrolled-beneficiaries/">Enrolled Beneficiaries</a></li>
+<li><a href="/enrolled-beneficiaries/">Enrolled Beneficiaries</a></li>
+```
+
 </ul>
 
 <hr>
@@ -28,7 +42,10 @@
 <ul>
     <li><a href="/academic-monitoring/">Academic Monitoring</a></li>
 
-    <li><a href="/expenditure-monitoring/">Expenditure Monitoring</a></li>
+```
+<li><a href="/expenditure-monitoring/">Expenditure Monitoring</a></li>
+```
+
 </ul>
 
 <hr>

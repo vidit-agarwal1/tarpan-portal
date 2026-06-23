@@ -28,6 +28,24 @@ path(
     name='enrolled_beneficiaries'
 ),
 
+path(
+    'verify-application/<int:beneficiary_id>/',
+    views.verify_application,
+    name='verify_application'
+),
+
+path(
+    'enroll-beneficiary/<int:beneficiary_id>/',
+    views.enroll_beneficiary,
+    name='enroll_beneficiary'
+),
+
+path(
+    'beneficiary/<int:beneficiary_id>/',
+    views.beneficiary_detail,
+    name='beneficiary_detail'
+),
+
 path('admission/personal/', views.admission_personal, name='admission_personal'),
 path('admission/education/', views.admission_education, name='admission_education'),
 path('admission/support/', views.admission_support, name='admission_support'),

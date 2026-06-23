@@ -14,8 +14,23 @@ def admin_dashboard(request):
 
     total_beneficiaries = Beneficiary.objects.count()
 
+    applied_count = Beneficiary.objects.filter(
+        status='APPLIED'
+    ).count()
+
+    verified_count = Beneficiary.objects.filter(
+        status='VERIFIED'
+    ).count()
+
+    enrolled_count = Beneficiary.objects.filter(
+        status='ENROLLED'
+    ).count()
+
     context = {
-        'total_beneficiaries': total_beneficiaries
+        'total_beneficiaries': total_beneficiaries,
+        'applied_count': applied_count,
+        'verified_count': verified_count,
+        'enrolled_count': enrolled_count
     }
 
     return render(
@@ -54,6 +69,17 @@ def verified_applications(request):
         'accounts/verified_applications.html',
         context
     )
+
+def verify_application(request, beneficiary_id):
+
+    beneficiary = Beneficiary.objects.get(
+        id=beneficiary_id
+    )
+
+    beneficiary.status = 'VERIFIED'
+    beneficiary.save()
+
+    return redirect('admission_applications')
 
 def enrolled_beneficiaries(request):
 
@@ -168,4 +194,41 @@ def admission_review(request):
         request,
         'accounts/admission_review.html',
         {'data': data} 
+    )
+
+def enroll_beneficiary(request, beneficiary_id):
+
+    beneficiary = Beneficiary.objects.get(
+        id=beneficiary_id
+    )
+
+    beneficiary.status = 'ENROLLED'
+
+    beneficiary.enrollment_id = (
+        "TP2026" + str(beneficiary.id).zfill(3)
+    )
+
+    beneficiary.save()
+
+    return redirect('verified_applications')
+
+def beneficiary_detail(request, beneficiary_id):
+
+    beneficiary = Beneficiary.objects.get(
+        id=beneficiary_id
+    )
+
+    application = AdmissionApplication.objects.get(
+        beneficiary=beneficiary
+    )
+
+    context = {
+        'beneficiary': beneficiary,
+        'application': application
+    }
+
+    return render(
+        request,
+        'accounts/beneficiary_detail.html',
+        context
     )

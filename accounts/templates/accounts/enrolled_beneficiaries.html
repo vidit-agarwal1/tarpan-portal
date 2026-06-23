@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>Enrolled Beneficiaries</title>
@@ -11,14 +12,26 @@
 
 <tr>
     <th>Name</th>
+    <th>Enrollment ID</th>
     <th>Status</th>
 </tr>
 
 {% for beneficiary in beneficiaries %}
 
 <tr>
-    <td>{{ beneficiary.name }}</td>
-    <td>{{ beneficiary.status }}</td>
+
+```
+<td>
+    <a href="{% url 'beneficiary_detail' beneficiary.id %}">
+        {{ beneficiary.name }}
+    </a>
+</td>
+
+<td>{{ beneficiary.enrollment_id }}</td>
+
+<td>{{ beneficiary.status }}</td>
+```
+
 </tr>
 
 {% endfor %}

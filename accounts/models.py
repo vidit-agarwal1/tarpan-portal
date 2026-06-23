@@ -52,8 +52,8 @@ class Beneficiary(models.Model):
         default='ENQUIRY'
     )
 
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 class AdmissionApplication(models.Model):
 

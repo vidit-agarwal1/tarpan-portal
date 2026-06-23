@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>Verified Applications</title>
@@ -12,13 +13,29 @@
 <tr>
     <th>Name</th>
     <th>Status</th>
+    <th>Action</th>
 </tr>
 
 {% for application in applications %}
 
 <tr>
-    <td>{{ application.name }}</td>
-    <td>{{ application.status }}</td>
+
+```
+<td>
+    <a href="{% url 'beneficiary_detail' application.id %}">
+        {{ application.name }}
+    </a>
+</td>
+
+<td>{{ application.status }}</td>
+
+<td>
+    <a href="{% url 'enroll_beneficiary' application.id %}">
+        Enroll
+    </a>
+</td>
+```
+
 </tr>
 
 {% endfor %}
@@ -27,3 +44,4 @@
 
 </body>
 </html>
+

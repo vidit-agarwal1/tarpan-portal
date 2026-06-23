@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Beneficiary Details</title>
+</head>
+<body>
+
+<h1>Beneficiary Details</h1>
+
+<h2>Personal Information</h2>
+
+<p>Name: {{ beneficiary.name }}</p>
+<p>Phone: {{ beneficiary.phone }}</p>
+<p>Email: {{ beneficiary.email }}</p>
+<p>Gender: {{ beneficiary.gender }}</p>
+<p>Date of Birth: {{ beneficiary.date_of_birth }}</p>
+<p>District: {{ beneficiary.district }}</p>
+<p>Address: {{ beneficiary.address }}</p>
+<p>Category: {{ beneficiary.category }}</p>
+
+<hr>
+
+<h2>Education Information</h2>
+
+<p>College: {{ application.college_name }}</p>
+<p>Course: {{ application.course_name }}</p>
+<p>Academic Year: {{ application.academic_year }}</p>
+
+<hr>
+
+<h2>Support Information</h2>
+
+<p>Support Required: {{ application.support_required }}</p>
+<p>Family Income: {{ application.family_income }}</p>
+<p>Reason: {{ application.reason }}</p>
+
+<hr>
+
+<h2>Current Status</h2>
+
+<p>Status: {{ beneficiary.status }}</p>
+<p>Enrollment ID: {{ beneficiary.enrollment_id }}</p>
+
+</body>
+</html>
