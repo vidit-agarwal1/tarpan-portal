@@ -1,0 +1,18 @@
+<h1>Financial Update</h1>
+
+<form method="POST">
+{% csrf_token %}
+
+Amount: <input type="number" name="amount_disbursed"><br><br>
+
+Purpose: <input type="text" name="purpose"><br><br>
+
+Remarks:
+
+<textarea name="remarks"></textarea><br><br>
+
+<button type="submit">
+Save
+</button>
+
+</form>

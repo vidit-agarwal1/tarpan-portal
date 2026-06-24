@@ -1,0 +1,29 @@
+<h1>Academic Monitoring</h1>
+
+<table border="1">
+
+<tr>
+    <th>Name</th>
+    <th>Enrollment ID</th>
+    <th>Action</th>
+</tr>
+
+{% for beneficiary in beneficiaries %}
+
+<tr>
+    <td>{{ beneficiary.name }}</td>
+    <td>{{ beneficiary.enrollment_id }}</td>
+
+
+<td>
+    <a href="{% url 'academic_update' beneficiary.id %}">
+        Update Academic Record
+    </a>
+</td>
+
+
+</tr>
+
+{% endfor %}
+
+</table>

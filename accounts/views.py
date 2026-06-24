@@ -232,3 +232,82 @@ def beneficiary_detail(request, beneficiary_id):
         'accounts/beneficiary_detail.html',
         context
     )
+
+from .models import AcademicRecord, FinancialRecord
+
+def academic_monitoring(request):
+
+    beneficiaries = Beneficiary.objects.filter(
+        status='ENROLLED'
+    )
+
+    return render(
+        request,
+        'accounts/academic_monitoring.html',
+        {'beneficiaries': beneficiaries}
+)
+
+
+def academic_update(request, beneficiary_id):
+
+    beneficiary = Beneficiary.objects.get(
+        id=beneficiary_id
+    )
+
+    if request.method == "POST":
+
+        AcademicRecord.objects.create(
+            beneficiary=beneficiary,
+            semester=request.POST.get('semester'),
+            cgpa=request.POST.get('cgpa'),
+            attendance=request.POST.get('attendance'),
+            remarks=request.POST.get('remarks')
+    )
+
+    beneficiary.status = 'ACADEMIC'
+    beneficiary.save()
+
+    return redirect('academic_monitoring')
+
+    return render(
+        request,
+        'accounts/academic_update.html',
+        {'beneficiary': beneficiary}
+    )
+
+def expenditure_monitoring(request):
+
+    beneficiaries = Beneficiary.objects.filter(
+        status='ACADEMIC'
+    )
+
+    return render(
+        request,
+        'accounts/expenditure_monitoring.html',
+        {'beneficiaries': beneficiaries}
+)
+
+
+def financial_update(request, beneficiary_id):
+
+    beneficiary = Beneficiary.objects.get(
+        id=beneficiary_id
+    )
+    
+    if request.method == "POST":
+    
+        FinancialRecord.objects.create(
+            beneficiary=beneficiary,
+            amount_disbursed=request.POST.get('amount_disbursed'),
+            purpose=request.POST.get('purpose'),
+            remarks=request.POST.get('remarks')
+        )
+    
+        return redirect('expenditure_monitoring')
+    
+    return render(
+        request,
+        'accounts/financial_update.html',
+        {'beneficiary': beneficiary}
+    )
+

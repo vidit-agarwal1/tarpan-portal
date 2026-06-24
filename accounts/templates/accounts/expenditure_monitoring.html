@@ -1,0 +1,29 @@
+<h1>Financial Monitoring</h1>
+
+<table border="1">
+
+<tr>
+    <th>Name</th>
+    <th>Enrollment ID</th>
+    <th>Action</th>
+</tr>
+
+{% for beneficiary in beneficiaries %}
+
+<tr>
+    <td>{{ beneficiary.name }}</td>
+    <td>{{ beneficiary.enrollment_id }}</td>
+
+
+<td>
+    <a href="{% url 'financial_update' beneficiary.id %}">
+        Add Financial Record
+    </a>
+</td>
+
+
+</tr>
+
+{% endfor %}
+
+</table>

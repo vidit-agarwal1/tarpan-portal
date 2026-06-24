@@ -88,3 +88,54 @@ class AdmissionApplication(models.Model):
 
     def __str__(self):
         return f"{self.beneficiary.name} - {self.course_name}"
+    
+class AcademicRecord(models.Model):
+
+    beneficiary = models.ForeignKey(
+        Beneficiary,
+        on_delete=models.CASCADE
+    )
+
+    semester = models.IntegerField()
+
+    cgpa = models.FloatField()
+
+    attendance = models.FloatField()
+
+    remarks = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    updated_on = models.DateField(
+        auto_now=True
+)
+
+def __str__(self):
+    return self.beneficiary.name
+
+
+class FinancialRecord(models.Model):
+
+    beneficiary = models.ForeignKey(
+        Beneficiary,
+        on_delete=models.CASCADE
+    )
+
+    amount_disbursed = models.FloatField()
+
+    purpose = models.CharField(
+        max_length=200
+    )
+
+    remarks = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    disbursement_date = models.DateField(
+        auto_now_add=True
+    )
+
+def __str__(self):
+    return self.beneficiary.name

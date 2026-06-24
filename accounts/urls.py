@@ -46,6 +46,31 @@ path(
     name='beneficiary_detail'
 ),
 
+path(
+'academic-monitoring/',
+views.academic_monitoring,
+name='academic_monitoring'
+),
+
+path(
+    'academic-update/<int:beneficiary_id>/',
+    views.academic_update,
+    name='academic_update'
+),
+
+path(
+'expenditure-monitoring/',
+views.expenditure_monitoring,
+name='expenditure_monitoring'
+),
+
+path(
+    'financial-update/<int:beneficiary_id>/',
+    views.financial_update,
+    name='financial_update'
+),
+
+
 path('admission/personal/', views.admission_personal, name='admission_personal'),
 path('admission/education/', views.admission_education, name='admission_education'),
 path('admission/support/', views.admission_support, name='admission_support'),
