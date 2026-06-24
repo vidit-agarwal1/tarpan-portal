@@ -42,5 +42,23 @@
 <p>Status: {{ beneficiary.status }}</p>
 <p>Enrollment ID: {{ beneficiary.enrollment_id }}</p>
 
+{% if application.dynamic_fields.all %}
+<h3>Additional Information</h3>
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Field</th>
+        <th>Value</th>
+    </tr>
+    {% for field in application.dynamic_fields.all %}
+    <tr>
+        <td>{{ field.field_name }}</td>
+        <td>{{ field.field_value }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+
 </body>
 </html>
+

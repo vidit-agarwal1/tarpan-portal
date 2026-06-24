@@ -26,6 +26,13 @@
 <p><strong>Support Required:</strong> {{ data.support_required }}</p>
 <p><strong>Family Income:</strong> {{ data.family_income }}</p>
 
+{% if data.dynamic_fields %}
+<h3>Additional Information</h3>
+{% for field in data.dynamic_fields %}
+    <p><strong>{{ field.name }}:</strong> {{ field.value }}</p>
+{% endfor %}
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
     <button type="submit">

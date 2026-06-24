@@ -88,3 +88,17 @@ class AdmissionApplication(models.Model):
 
     def __str__(self):
         return f"{self.beneficiary.name} - {self.course_name}"
+    
+# Add this below your AdmissionApplication model
+
+class DynamicField(models.Model):
+    application = models.ForeignKey(
+        'AdmissionApplication',
+        on_delete=models.CASCADE,
+        related_name='dynamic_fields'
+    )
+    field_name  = models.CharField(max_length=100)
+    field_value = models.TextField()  # stores sentences, words, numbers — all as text
+
+    def __str__(self):
+        return f"{self.field_name}: {self.field_value}"
