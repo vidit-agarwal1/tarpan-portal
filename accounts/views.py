@@ -135,36 +135,23 @@ def admission_education(request):
 
 
 
-def admission_support(request):
-
-    if request.method == "POST":
-
-        request.session['support_required'] = request.POST.get('support_required')
-        request.session['family_income'] = request.POST.get('family_income')
-        request.session['reason'] = request.POST.get('reason')
-
-        return redirect('admission_review')
-
-    return render(request, 'accounts/admission_support.html')
-
 def admission_review(request):
 
     data = {
-    'name': request.session.get('name'),
-    'phone': request.session.get('phone'),
-    'email': request.session.get('email'),
-    'district': request.session.get('district'),
-
-    'college_name': request.session.get('college_name'),
-    'course_name': request.session.get('course_name'),
-    'academic_year': request.session.get('academic_year'),
-
-    'support_required': request.session.get('support_required'),
-    'family_income': request.session.get('family_income'),
-}
+        'name':             request.session.get('name'),
+        'phone':            request.session.get('phone'),
+        'email':            request.session.get('email'),
+        'district':         request.session.get('district'),
+        'college_name':     request.session.get('college_name'),
+        'course_name':      request.session.get('course_name'),
+        'academic_year':    request.session.get('academic_year'),
+        'support_required': request.session.get('support_required'),
+        'family_income':    request.session.get('family_income'),
+        'dynamic_fields':   request.session.get('dynamic_fields', []),  # <-- add this
+    }
 
     if request.method == "POST":
-    
+
         beneficiary = Beneficiary.objects.create(
             name=request.session.get('name'),
             phone=request.session.get('phone'),
@@ -177,8 +164,8 @@ def admission_review(request):
             category=request.session.get('category'),
             status='APPLIED'
         )
-    
-        AdmissionApplication.objects.create(
+
+        application = AdmissionApplication.objects.create(
             beneficiary=beneficiary,
             college_name=request.session.get('college_name'),
             course_name=request.session.get('course_name'),
@@ -188,12 +175,22 @@ def admission_review(request):
             family_income=request.session.get('family_income'),
             reason=request.session.get('reason')
         )
+
+        # Save dynamic fields to DB
+        from .models import DynamicField
+        for field in request.session.get('dynamic_fields', []):
+            DynamicField.objects.create(
+                application=application,
+                field_name=field['name'],
+                field_value=field['value']
+            )
+
         return redirect('home')
-    
+
     return render(
         request,
         'accounts/admission_review.html',
-        {'data': data} 
+        {'data': data}
     )
 
 def enroll_beneficiary(request, beneficiary_id):
@@ -232,6 +229,7 @@ def beneficiary_detail(request, beneficiary_id):
         'accounts/beneficiary_detail.html',
         context
     )
+
 
 from .models import AcademicRecord, FinancialRecord
 
@@ -310,4 +308,28 @@ def financial_update(request, beneficiary_id):
         'accounts/financial_update.html',
         {'beneficiary': beneficiary}
     )
+
+def admission_support(request):
+
+    if request.method == "POST":
+
+        request.session['support_required'] = request.POST.get('support_required')
+        request.session['family_income'] = request.POST.get('family_income')
+        request.session['reason'] = request.POST.get('reason')
+
+        field_names  = request.POST.getlist('field_names[]')
+        field_values = request.POST.getlist('field_values[]')
+
+        dynamic_fields = []
+        for name, value in zip(field_names, field_values):
+            name  = name.strip()
+            value = value.strip()
+            if name:
+                dynamic_fields.append({'name': name, 'value': value})
+
+        request.session['dynamic_fields'] = dynamic_fields
+
+        return redirect('admission_review')
+
+    return render(request, 'accounts/admission_support.html')
 

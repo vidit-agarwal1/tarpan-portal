@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
     <title>Admission - Support Information</title>
@@ -11,20 +10,64 @@
 <form method="post">
     {% csrf_token %}
 
+    <label>Type of Support Required:</label><br>
+    <input type="text" name="support_required"><br><br>
 
-<label>Type of Support Required:</label><br>
-<input type="text" name="support_required"><br><br>
+    <label>Family Annual Income:</label><br>
+    <input type="number" name="family_income"><br><br>
 
-<label>Family Annual Income:</label><br>
-<input type="number" name="family_income"><br><br>
+    <label>Reason for Assistance:</label><br>
+    <textarea name="reason"></textarea><br><br>
 
-<label>Reason for Assistance:</label><br>
-<textarea name="reason"></textarea><br><br>
+    <!-- ====== DYNAMIC FIELDS SECTION ====== -->
+    <h3>Additional Information (Optional)</h3>
+    <p>Add any extra details you'd like to share with the organization.</p>
 
-<button type="submit">Review Application</button>
+    <div id="dynamic-fields-container"></div>
 
+    <button type="button" onclick="addField()">+ Add a Field</button><br><br>
+    <!-- ====================================== -->
 
+    <button type="submit">Review Application</button>
 </form>
+
+<script>
+    let fieldCount = 0;
+
+    function addField() {
+        fieldCount++;
+        const container = document.getElementById('dynamic-fields-container');
+
+        const row = document.createElement('div');
+        row.id = 'field-row-' + fieldCount;
+        row.style.marginBottom = '10px';
+
+        row.innerHTML = `
+            <input
+                type="text"
+                name="field_names[]"
+                placeholder="Field label (e.g. Medical Condition)"
+                style="width: 220px;"
+            />
+            &nbsp;
+            <input
+                type="text"
+                name="field_values[]"
+                placeholder="Your answer (text, numbers, sentences)"
+                style="width: 320px;"
+            />
+            &nbsp;
+            <button type="button" onclick="removeField(${fieldCount})">Remove</button>
+        `;
+
+        container.appendChild(row);
+    }
+
+    function removeField(id) {
+        const row = document.getElementById('field-row-' + id);
+        if (row) row.remove();
+    }
+</script>
 
 </body>
 </html>
