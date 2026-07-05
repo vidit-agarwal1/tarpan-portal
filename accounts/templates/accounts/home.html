@@ -9,12 +9,19 @@
 
 <h2>Select Login Type</h2>
 
-<a href="/user-dashboard/">
+<a href="{% url 'user_login' %}">
     <button>User Login</button>
 </a>
 
-<a href="/admin-dashboard/">
+<a href="{% url 'admin_dashboard' %}">
     <button>Admin Login</button>
+</a>
+
+<hr>
+
+<h2>New Applicant?</h2>
+<a href="{% url 'admission_personal' %}">
+    <button>Apply Here</button>
 </a>
 
 </body>
