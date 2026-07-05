@@ -1,20 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard</title>
+    <title>My Application</title>
 </head>
 <body>
 
-<h1>Admin Dashboard</h1>
+<h1>Welcome, {{ beneficiary.name }}</h1>
 
-<ul>
-    <li>Enquiry Profiles</li>
-    <li>Admission Applications</li>
-    <li>Enrolled Beneficiaries</li>
-    <li>Academic Monitoring</li>
-    <li>Expenditure Monitoring</li>
-    <li>Reports</li>
-</ul>
+<hr>
+
+<h3>Your Login Details</h3>
+<p><strong>Applicant ID:</strong> {{ beneficiary.applicant_id }}</p>
+<p><strong>Password:</strong> Your Date of Birth (YYYY-MM-DD)</p>
+
+{% if beneficiary.enrollment_id %}
+<p><strong>Enrollment ID:</strong> {{ beneficiary.enrollment_id }}</p>
+{% endif %}
+
+<hr>
+
+<h3>Application Status</h3>
+<p><strong>Current Status:</strong> {{ beneficiary.get_status_display }}</p>
+
+{% if beneficiary.status == 'APPLIED' %}
+    <p style="color: orange;">⏳ Your application is under review.</p>
+{% elif beneficiary.status == 'VERIFIED' %}
+    <p style="color: blue;">✅ Your application has been verified. Awaiting enrollment.</p>
+{% elif beneficiary.status == 'ENROLLED' %}
+    <p style="color: green;">🎓 You are enrolled! Your Enrollment ID is <strong>{{ beneficiary.enrollment_id }}</strong>.</p>
+{% elif beneficiary.status == 'ACADEMIC' %}
+    <p style="color: green;">📚 You are in the academic monitoring phase.</p>
+{% elif beneficiary.status == 'JOB' %}
+    <p style="color: green;">💼 You are in the job assistance phase.</p>
+{% elif beneficiary.status == 'COMPLETED' %}
+    <p style="color: green;">🏆 Your program is complete. Congratulations!</p>
+{% endif %}
+
+<hr>
+
+<h3>Personal Details</h3>
+<p><strong>Phone:</strong> {{ beneficiary.phone }}</p>
+<p><strong>Email:</strong> {{ beneficiary.email }}</p>
+<p><strong>District:</strong> {{ beneficiary.district }}</p>
+<p><strong>Address:</strong> {{ beneficiary.address }}</p>
+<p><strong>Category:</strong> {{ beneficiary.category }}</p>
+
+{% if application %}
+<hr>
+<h3>Application Details</h3>
+<p><strong>College:</strong> {{ application.college_name }}</p>
+<p><strong>Course:</strong> {{ application.course_name }}</p>
+<p><strong>Academic Year:</strong> {{ application.academic_year }}</p>
+<p><strong>Support Required:</strong> {{ application.support_required }}</p>
+<p><strong>Family Income:</strong> {{ application.family_income }}</p>
+
+{% if application.dynamic_fields.all %}
+<hr>
+<h3>Additional Information Submitted</h3>
+{% for field in application.dynamic_fields.all %}
+    <p><strong>{{ field.field_name }}:</strong> {{ field.field_value }}</p>
+{% endfor %}
+{% endif %}
+{% endif %}
+
+<hr>
+<a href="{% url 'user_logout' %}">Logout</a>
 
 </body>
 </html>

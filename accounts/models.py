@@ -36,6 +36,13 @@ class Beneficiary(models.Model):
         null=True
     )
 
+    applicant_id = models.CharField(
+        max_length=20,
+        blank = True,
+        null = True,
+        unique = True
+    )
+
     STATUS_CHOICES = [
         ('ENQUIRY', 'Enquiry'),
         ('APPLIED', 'Admission Applied'),
