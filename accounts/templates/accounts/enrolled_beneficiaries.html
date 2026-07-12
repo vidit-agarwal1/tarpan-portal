@@ -1,42 +1,77 @@
-<!DOCTYPE html>
+{% extends 'accounts/base.html' %}
 
-<html>
-<head>
-    <title>Enrolled Beneficiaries</title>
-</head>
-<body>
+{% block title %}Enrolled Beneficiaries | Tarpan Admin{% endblock %}
 
-<h1>Enrolled Beneficiaries</h1>
+{% block nav_links %}
+<a href="{% url 'admin_dashboard' %}" class="nav-link">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+</a>
+<span class="nav-link active">
+    <i data-lucide="award"></i> Enrolled List
+</span>
+<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Leave
+</a>
+{% endblock %}
 
-<table border="1">
+{% block content %}
+<div class="fade-in">
+    <!-- Back Header -->
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="font-size: 1.75rem; font-weight: 800;">Enrolled Beneficiaries</h2>
+            <p class="text-secondary" style="font-size: 0.95rem;">Active participants enrolled in the Tarpan Foundation educational support program.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left"></i> Dashboard
+        </a>
+    </div>
 
-<tr>
-    <th>Name</th>
-    <th>Enrollment ID</th>
-    <th>Status</th>
-</tr>
-
-{% for beneficiary in beneficiaries %}
-
-<tr>
-
-```
-<td>
-    <a href="{% url 'beneficiary_detail' beneficiary.id %}">
-        {{ beneficiary.name }}
-    </a>
-</td>
-
-<td>{{ beneficiary.enrollment_id }}</td>
-
-<td>{{ beneficiary.status }}</td>
-```
-
-</tr>
-
-{% endfor %}
-
-</table>
-
-</body>
-</html>
+    <!-- Table Card -->
+    <div class="card" style="padding: 1.5rem 1rem;">
+        {% if beneficiaries %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Beneficiary Name</th>
+                        <th>Enrollment ID</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for beneficiary in beneficiaries %}
+                    <tr>
+                        <td style="font-weight: 600;">
+                            <a href="{% url 'beneficiary_detail' beneficiary.id %}" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                                <i data-lucide="user" style="width: 1.15rem; height: 1.15rem; color: var(--text-muted);"></i>
+                                {{ beneficiary.name }}
+                            </a>
+                        </td>
+                        <td style="font-family: monospace; font-weight: 700; color: var(--primary); font-size: 0.95rem;">
+                            {{ beneficiary.enrollment_id }}
+                        </td>
+                        <td>
+                            <span class="badge badge-enrolled">{{ beneficiary.get_status_display }}</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{% url 'beneficiary_detail' beneficiary.id %}" class="btn btn-outline btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                <i data-lucide="folder-open" style="width: 0.9rem; height: 0.9rem;"></i> Profile File
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 1.5rem;">
+            <i data-lucide="user-x" style="width: 3rem; height: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem;">No Enrolled Beneficiaries</h3>
+            <p class="text-secondary" style="font-size: 0.9rem;">No active students mapped to program enrollment databases yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

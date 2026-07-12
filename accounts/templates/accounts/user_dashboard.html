@@ -1,94 +1,239 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Application</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Welcome, {{ beneficiary.name }}</h1>
+{% block title %}My Portal | Tarpan Foundation{% endblock %}
 
-<hr>
+{% block nav_links %}
+<span class="nav-link active">
+    <i data-lucide="user"></i> Applicant Panel
+</span>
+<a href="{% url 'user_logout' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Logout
+</a>
+{% endblock %}
 
-<h3>Your Login Details</h3>
-<p><strong>Applicant ID:</strong> {{ beneficiary.applicant_id }}</p>
-<p><strong>Password:</strong> Your Date of Birth (YYYY-MM-DD)</p>
+{% block content %}
+<div class="fade-in">
+    <!-- Welcome Header -->
+    <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.25rem; font-weight: 800;">Welcome, {{ beneficiary.name }}</h1>
+            <p class="text-secondary" style="font-size: 1rem;">Track your progress, credentials, and uploaded documentation.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <span class="badge 
+                {% if beneficiary.status == 'APPLIED' %}badge-applied
+                {% elif beneficiary.status == 'VERIFIED' %}badge-verified
+                {% elif beneficiary.status == 'ENROLLED' %}badge-enrolled
+                {% elif beneficiary.status == 'ACADEMIC' %}badge-academic
+                {% elif beneficiary.status == 'JOB' %}badge-job
+                {% elif beneficiary.status == 'COMPLETED' %}badge-completed
+                {% else %}badge-enquiry{% endif %}" 
+                style="padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-sm);">
+                Status: {{ beneficiary.get_status_display }}
+            </span>
+        </div>
+    </div>
 
-{% if beneficiary.enrollment_id %}
-<p><strong>Enrollment ID:</strong> {{ beneficiary.enrollment_id }}</p>
-{% endif %}
+    <!-- Visual Progress Timeline -->
+    <div class="card" style="padding: 2.5rem 2rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="git-commit" style="color: var(--primary);"></i>
+            Your Journey Progress
+        </h3>
+        
+        <div style="display: flex; justify-content: space-between; position: relative; max-width: 900px; margin: 0 auto 1.5rem auto; padding: 0 1rem;">
+            <!-- Background Line -->
+            <div style="position: absolute; top: 1.25rem; left: 2rem; right: 2rem; height: 3px; background-color: var(--border); z-index: 1;"></div>
+            
+            <!-- Step 1: Applied -->
+            <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px; text-align: center;">
+                <div class="step-bubble {% if beneficiary.status != 'ENQUIRY' %}completed{% endif %}" style="margin: 0; width: 2.5rem; height: 2.5rem;">
+                    {% if beneficiary.status != 'ENQUIRY' %}<i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i>{% else %}1{% endif %}
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; color: var(--text-primary);">Applied</span>
+            </div>
 
-<hr>
+            <!-- Step 2: Verified -->
+            <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px; text-align: center;">
+                <div class="step-bubble {% if beneficiary.status != 'ENQUIRY' and beneficiary.status != 'APPLIED' %}completed{% elif beneficiary.status == 'APPLIED' %}active{% endif %}" style="margin: 0; width: 2.5rem; height: 2.5rem;">
+                    {% if beneficiary.status != 'ENQUIRY' and beneficiary.status != 'APPLIED' %}<i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i>{% else %}2{% endif %}
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; color: {% if beneficiary.status == 'APPLIED' %}var(--primary){% elif beneficiary.status != 'ENQUIRY' and beneficiary.status != 'APPLIED' %}var(--text-primary){% else %}var(--text-muted){% endif %};">Verified</span>
+            </div>
 
-<h3>Application Status</h3>
-<p><strong>Current Status:</strong> {{ beneficiary.get_status_display }}</p>
+            <!-- Step 3: Enrolled -->
+            <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px; text-align: center;">
+                <div class="step-bubble {% if beneficiary.status == 'ENROLLED' or beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}completed{% elif beneficiary.status == 'VERIFIED' %}active{% endif %}" style="margin: 0; width: 2.5rem; height: 2.5rem;">
+                    {% if beneficiary.status == 'ENROLLED' or beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}<i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i>{% else %}3{% endif %}
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; color: {% if beneficiary.status == 'VERIFIED' %}var(--primary){% elif beneficiary.status == 'ENROLLED' or beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}var(--text-primary){% else %}var(--text-muted){% endif %};">Enrolled</span>
+            </div>
 
-{% if beneficiary.status == 'APPLIED' %}
-    <p style="color: orange;">⏳ Your application is under review.</p>
-{% elif beneficiary.status == 'VERIFIED' %}
-    <p style="color: blue;">✅ Your application has been verified. Awaiting enrollment.</p>
-{% elif beneficiary.status == 'ENROLLED' %}
-    <p style="color: green;">🎓 You are enrolled! Your Enrollment ID is <strong>{{ beneficiary.enrollment_id }}</strong>.</p>
-{% elif beneficiary.status == 'ACADEMIC' %}
-    <p style="color: green;">📚 You are in the academic monitoring phase.</p>
-{% elif beneficiary.status == 'JOB' %}
-    <p style="color: green;">💼 You are in the job assistance phase.</p>
-{% elif beneficiary.status == 'COMPLETED' %}
-    <p style="color: green;">🏆 Your program is complete. Congratulations!</p>
-{% endif %}
+            <!-- Step 4: Active Support -->
+            <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px; text-align: center;">
+                <div class="step-bubble {% if beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}completed{% elif beneficiary.status == 'ENROLLED' %}active{% endif %}" style="margin: 0; width: 2.5rem; height: 2.5rem;">
+                    {% if beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}<i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i>{% else %}4{% endif %}
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; color: {% if beneficiary.status == 'ENROLLED' %}var(--primary){% elif beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' or beneficiary.status == 'COMPLETED' %}var(--text-primary){% else %}var(--text-muted){% endif %};">Monitoring</span>
+            </div>
 
-<hr>
+            <!-- Step 5: Completed -->
+            <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px; text-align: center;">
+                <div class="step-bubble {% if beneficiary.status == 'COMPLETED' %}completed{% elif beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' %}active{% endif %}" style="margin: 0; width: 2.5rem; height: 2.5rem;">
+                    {% if beneficiary.status == 'COMPLETED' %}<i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i>{% else %}5{% endif %}
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; color: {% if beneficiary.status == 'COMPLETED' %}var(--success){% elif beneficiary.status == 'ACADEMIC' or beneficiary.status == 'JOB' %}var(--primary){% else %}var(--text-muted){% endif %};">Completed</span>
+            </div>
+        </div>
 
-<h3>Personal Details</h3>
-<p><strong>Phone:</strong> {{ beneficiary.phone }}</p>
-<p><strong>Email:</strong> {{ beneficiary.email }}</p>
-<p><strong>District:</strong> {{ beneficiary.district }}</p>
-<p><strong>Address:</strong> {{ beneficiary.address }}</p>
-<p><strong>Category:</strong> {{ beneficiary.category }}</p>
+        <!-- Descriptive Status Banner -->
+        <div style="background-color: var(--background); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="info" style="color: var(--primary); flex-shrink: 0;"></i>
+            <span style="font-size: 0.95rem;">
+                {% if beneficiary.status == 'APPLIED' %}
+                    ⏳ Your application has been successfully submitted and is under initial review by our admissions board.
+                {% elif beneficiary.status == 'VERIFIED' %}
+                    ✅ Your application details and eligibility criteria have been verified. You are in the queue for enrollment mapping.
+                {% elif beneficiary.status == 'ENROLLED' %}
+                    🎓 <strong>Congratulations!</strong> You are enrolled in the Tarpan Program. Your Enrollment ID is <strong>{{ beneficiary.enrollment_id }}</strong>.
+                {% elif beneficiary.status == 'ACADEMIC' %}
+                    📚 You are in the active sponsorship phase. We are monitoring your semester-wise academic metrics and expenditures.
+                {% elif beneficiary.status == 'JOB' %}
+                    💼 You are in the job assistance phase. Our career counselors are helping map you to internship and placement opportunities.
+                {% elif beneficiary.status == 'COMPLETED' %}
+                    🏆 <strong>Congratulations!</strong> You have successfully graduated and completed the Tarpan Foundation Program!
+                {% endif %}
+            </span>
+        </div>
+    </div>
 
-{% if application %}
-<hr>
-<h3>Application Details</h3>
-<p><strong>College:</strong> {{ application.college_name }}</p>
-<p><strong>Course:</strong> {{ application.course_name }}</p>
-<p><strong>Academic Year:</strong> {{ application.academic_year }}</p>
-<p><strong>Support Required:</strong> {{ application.support_required }}</p>
-<p><strong>Family Income:</strong> {{ application.family_income }}</p>
+    <div class="grid-3" style="grid-template-columns: 1fr 2fr; align-items: start; gap: 2rem;">
+        <!-- Left: Profile & Account Sidebar -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Login Credentials Card -->
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                    <i data-lucide="key" style="width: 1.15rem; height: 1.15rem;"></i>
+                    Account Portal Details
+                </h3>
+                <div class="detail-list" style="font-size: 0.9rem;">
+                    <div class="detail-item">
+                        <span class="detail-label">Applicant ID:</span> 
+                        <span class="detail-value" style="font-family: monospace; letter-spacing: 0.05em; font-size: 0.95rem;">{{ beneficiary.applicant_id }}</span>
+                    </div>
+                    {% if beneficiary.enrollment_id %}
+                    <div class="detail-item">
+                        <span class="detail-label">Enrollment ID:</span>
+                        <span class="detail-value" style="color: var(--secondary); font-weight: 700;">{{ beneficiary.enrollment_id }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="detail-item">
+                        <span class="detail-label">Password Info:</span>
+                        <span class="detail-value" style="font-weight: 400; font-size: 0.85rem;">Date of Birth</span>
+                    </div>
+                </div>
+            </div>
 
-{% if application.dynamic_fields.all %}
-<hr>
-<h3>Additional Information Submitted</h3>
-{% for field in application.dynamic_fields.all %}
-    <p><strong>{{ field.field_name }}:</strong> {{ field.field_value }}</p>
-{% endfor %}
-{% endif %}
-{% endif %}
+            <!-- Personal Profile Card -->
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                    <i data-lucide="user-cog" style="width: 1.15rem; height: 1.15rem;"></i>
+                    Personal Profile
+                </h3>
+                <div class="detail-list" style="font-size: 0.9rem;">
+                    <div class="detail-item"><span class="detail-label">Phone:</span> <span class="detail-value">{{ beneficiary.phone }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Email:</span> <span class="detail-value">{{ beneficiary.email }}</span></div>
+                    <div class="detail-item"><span class="detail-label">District:</span> <span class="detail-value">{{ beneficiary.district }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Category:</span> <span class="detail-value">{{ beneficiary.category }}</span></div>
+                </div>
+                <div style="margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+                    <span class="detail-label" style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.25rem;">Address:</span>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ beneficiary.address }}</span>
+                </div>
+            </div>
+        </div>
 
-<hr>
+        <!-- Right: Application & Documents Main -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Application Details Card -->
+            {% if application %}
+            <div class="card" style="padding: 2rem;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="file-text" style="color: var(--primary);"></i>
+                    Application & Course Overview
+                </h3>
+                <div class="grid-2 detail-list" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 1.5rem;">
+                    <div class="detail-item"><span class="detail-label">College/Institution:</span> <span class="detail-value">{{ application.college_name }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Course:</span> <span class="detail-value">{{ application.course_name }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Academic Year:</span> <span class="detail-value">{{ application.academic_year }}</span></div>
+                    <div class="detail-item"><span class="detail-label">Family Income:</span> <span class="detail-value">INR {{ application.family_income }}</span></div>
+                </div>
 
-<hr>
+                <div class="info-box" style="padding: 1.25rem; margin: 1rem 0;">
+                    <span style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.25rem; color: var(--text-secondary);">Requested Support:</span>
+                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--primary);">{{ application.support_required }}</span>
+                </div>
 
-<h3>Documents</h3>
-{% if documents %}
-<table border="1" cellpadding="8">
-    <tr>
-        <th>Title</th>
-        <th>Uploaded</th>
-        <th>Download</th>
-    </tr>
-    {% for doc in documents %}
-    <tr>
-        <td>{{ doc.title }}</td>
-        <td>{{ doc.uploaded_at|date:"d M Y" }}</td>
-        <td><a href="{{ doc.file.url }}" target="_blank">Download</a></td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-    <p>No documents have been uploaded to your profile yet.</p>
-{% endif %}
+                {% if application.dynamic_fields.all %}
+                <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+                    <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Additional Information Submitted</h4>
+                    <div class="detail-list" style="font-size: 0.9rem;">
+                        {% for field in application.dynamic_fields.all %}
+                            <div class="detail-item">
+                                <span class="detail-label">{{ field.field_name }}:</span>
+                                <span class="detail-value">{{ field.field_value }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
 
-<hr>
-<a href="{% url 'user_logout' %}">Logout</a>
-
-</body>
-</html>
+            <!-- Documents Card -->
+            <div class="card" style="padding: 2rem;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="files" style="color: var(--primary);"></i>
+                    Your Uploaded Verification Documents
+                </h3>
+                
+                {% if documents %}
+                <div class="table-responsive" style="margin-bottom: 0;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Document Title</th>
+                                <th>Uploaded At</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td style="font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                    <i data-lucide="file-digit" style="width: 1.15rem; height: 1.15rem; color: var(--text-muted);"></i>
+                                    {{ doc.title }}
+                                </td>
+                                <td class="text-secondary" style="font-size: 0.9rem;">{{ doc.uploaded_at|date:"d M Y" }}</td>
+                                <td style="text-align: right;">
+                                    <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.25rem; font-weight: 500; font-size: 0.8rem; text-decoration: none;">
+                                        <i data-lucide="download" style="width: 0.9rem; height: 0.9rem;"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; border: 2px dashed var(--border); border-radius: var(--radius-md); background-color: var(--background);">
+                    <i data-lucide="file-warning" style="width: 2.5rem; height: 2.5rem; color: var(--text-muted); margin-bottom: 0.75rem;"></i>
+                    <p class="text-secondary" style="font-size: 0.95rem;">No documents uploaded to your profile yet.</p>
+                    <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.25rem;">Our administration team will request document uploads if necessary.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

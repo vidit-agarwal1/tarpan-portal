@@ -1,47 +1,78 @@
-<!DOCTYPE html>
+{% extends 'accounts/base.html' %}
 
-<html>
-<head>
-    <title>Verified Applications</title>
-</head>
-<body>
+{% block title %}Verified Queue | Tarpan Admin{% endblock %}
 
-<h1>Verified Applications</h1>
+{% block nav_links %}
+<a href="{% url 'admin_dashboard' %}" class="nav-link">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+</a>
+<span class="nav-link active">
+    <i data-lucide="clipboard-check"></i> Verified Queue
+</span>
+<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Leave
+</a>
+{% endblock %}
 
-<table border="1">
+{% block content %}
+<div class="fade-in">
+    <!-- Back Header -->
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="font-size: 1.75rem; font-weight: 800;">Verified Applications</h2>
+            <p class="text-secondary" style="font-size: 0.95rem;">Map candidate allocations and enroll verified individuals into the program.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left"></i> Dashboard
+        </a>
+    </div>
 
-<tr>
-    <th>Name</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
-
-{% for application in applications %}
-
-<tr>
-
-```
-<td>
-    <a href="{% url 'beneficiary_detail' application.id %}">
-        {{ application.name }}
-    </a>
-</td>
-
-<td>{{ application.status }}</td>
-
-<td>
-    <a href="{% url 'enroll_beneficiary' application.id %}">
-        Enroll
-    </a>
-</td>
-```
-
-</tr>
-
-{% endfor %}
-
-</table>
-
-</body>
-</html>
-
+    <!-- Table Card -->
+    <div class="card" style="padding: 1.5rem 1rem;">
+        {% if applications %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Applicant Name</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td style="font-weight: 600;">
+                            <a href="{% url 'beneficiary_detail' application.id %}" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                                <i data-lucide="user" style="width: 1.15rem; height: 1.15rem; color: var(--text-muted);"></i>
+                                {{ application.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge badge-verified">{{ application.get_status_display }}</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 0.5rem;">
+                                <a href="{% url 'beneficiary_detail' application.id %}" class="btn btn-outline btn-sm" style="text-decoration: none;">
+                                    View details
+                                </a>
+                                <a href="{% url 'enroll_beneficiary' application.id %}" class="btn btn-primary btn-sm" style="text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
+                                    <i data-lucide="user-plus" style="width: 0.9rem; height: 0.9rem;"></i> Enroll
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 1.5rem;">
+            <i data-lucide="folder-check" style="width: 3rem; height: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem;">No Verified Applicants</h3>
+            <p class="text-secondary" style="font-size: 0.9rem;">There are no verified candidates awaiting program enrollment mapping.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

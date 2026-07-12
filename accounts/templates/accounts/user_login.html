@@ -1,31 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Login</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Applicant Login</h1>
-<p>Use your Applicant ID and Date of Birth to log in.</p>
+{% block title %}Applicant Login | Tarpan Foundation{% endblock %}
 
-{% if error %}
-    <p style="color: red;">{{ error }}</p>
-{% endif %}
+{% block content %}
+<div class="auth-wrapper fade-in">
+    <div class="card">
+        <div class="text-center" style="margin-bottom: 2rem;">
+            <div class="metric-icon-wrapper primary" style="margin: 0 auto 1rem auto;">
+                <i data-lucide="user-check"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Applicant Login</h2>
+            <p class="text-muted" style="font-size: 0.9rem;">
+                Enter your unique Applicant ID and Date of Birth to access your profile.
+            </p>
+        </div>
 
-<form method="post">
-    {% csrf_token %}
+        {% if error %}
+        <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+            <i data-lucide="alert-circle" style="flex-shrink: 0;"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
 
-    <label>Applicant ID:</label><br>
-    <input type="text" name="applicant_id" placeholder="e.g. TAR-A3X9K"><br><br>
+        <form method="post">
+            {% csrf_token %}
 
-    <label>Date of Birth:</label><br>
-    <input type="date" name="dob"><br><br>
+            <div class="form-group">
+                <label for="applicant_id">Applicant ID</label>
+                <input 
+                    type="text" 
+                    id="applicant_id"
+                    name="applicant_id" 
+                    class="form-control"
+                    placeholder="e.g. TAR-A3X9K" 
+                    required
+                    style="text-transform: uppercase;"
+                >
+            </div>
 
-    <button type="submit">Login</button>
-</form>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input 
+                    type="date" 
+                    id="dob"
+                    name="dob" 
+                    class="form-control" 
+                    required
+                >
+            </div>
 
-<br>
-<a href="{% url 'home' %}">← Back to Home</a>
-
-</body>
-</html>
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                <i data-lucide="log-in"></i> Sign In
+            </button>
+        </form>
+        
+        <div class="text-center" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+            <a href="{% url 'home' %}" class="text-secondary" style="font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                <i data-lucide="arrow-left" style="width: 1rem; height: 1rem;"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

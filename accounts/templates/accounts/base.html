@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tarpan Foundation Portal{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="header-container">
+                <a href="{% url 'home' %}" class="brand-link" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0;">
+                    <img src="https://www.tarpanfoundation.org/assets/images/logo.png" alt="Tarpan Foundation Logo" class="brand-logo" style="height: 60px; width: auto; object-fit: contain;">
+                </a>
+                <nav class="header-nav">
+                    {% block nav_links %}
+                    <!-- Contextual navigation will be injected here -->
+                    {% endblock %}
+                </nav>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="main-content">
+            <div class="content-container">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="footer-container">
+                <p>&copy; 2026 Tarpan Foundation. Empowering Lives through Education & Care.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

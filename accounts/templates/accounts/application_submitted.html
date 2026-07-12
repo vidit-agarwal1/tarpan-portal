@@ -1,24 +1,73 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Application Submitted</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Application Submitted Successfully!</h1>
+{% block title %}Application Submitted | Tarpan Foundation{% endblock %}
 
-<p>Thank you for applying. Your application is now under review.</p>
+{% block content %}
+<div class="auth-wrapper fade-in" style="max-width: 550px; margin: 4rem auto;">
+    <div class="card text-center" style="border-top: 4px solid var(--success);">
+        <div class="metric-icon-wrapper secondary"
+            style="margin: 0 auto 1.5rem auto; background-color: var(--success-light); color: var(--success); width: 4rem; height: 4rem;">
+            <i data-lucide="party-popper" style="width: 2.25rem; height: 2.25rem;"></i>
+        </div>
 
-{% if applicant_id %}
-<div style="border: 2px solid green; padding: 20px; margin: 20px 0; background: #f0fff0;">
-    <h2>⚠️ Save this — you won't see it again!</h2>
-    <p><strong>Your Applicant ID:</strong> <span style="font-size: 24px;">{{ applicant_id }}</span></p>
-    <p><strong>Your Password:</strong> Your Date of Birth (format: YYYY-MM-DD)</p>
-    <p>Use these to log in and check your application status.</p>
+        <h2 style="font-size: 1.75rem; margin-bottom: 0.75rem;">Application Submitted!</h2>
+        <p class="text-secondary" style="font-size: 0.95rem; margin-bottom: 2rem;">
+            Thank you for applying to the Tarpan Foundation program. Your application has been registered successfully
+            and is currently under review.
+        </p>
+
+        {% if applicant_id %}
+        <div class="info-box"
+            style="border-color: var(--success); background-color: var(--success-light); text-align: left; padding: 1.5rem; margin-bottom: 2rem;">
+            <div class="info-box-header"
+                style="color: #047857; font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">
+                <i data-lucide="alert-triangle" style="width: 1.25rem; height: 1.25rem;"></i>
+                IMPORTANT: Save Credentials Now!
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+                <div>
+                    <span class="text-secondary">Applicant ID:</span>
+                    <div
+                        style="font-size: 1.75rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: var(--text-primary); margin-top: 0.25rem; letter-spacing: 0.05em; background-color: white; border: 1px dashed var(--border); padding: 0.5rem 1rem; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ applicant_id }}</span>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="copyId('{{ applicant_id }}')"
+                            style="font-size: 0.75rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                            <i data-lucide="copy" style="width: 0.9rem; height: 0.9rem;"></i> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 0.5rem; border-top: 1px solid rgba(0, 0, 0, 0.05); padding-top: 0.75rem;">
+                    <span class="text-secondary">Password:</span>
+                    <span class="bold" style="margin-left: 0.5rem; color: var(--text-primary);">Your Date of Birth
+                        (YYYY-MM-DD)</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a href="{% url 'user_login' %}" class="btn btn-primary">
+                Go to Login <i data-lucide="arrow-right"></i>
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-outline">
+                Back to Homepage
+            </a>
+        </div>
+    </div>
 </div>
-{% endif %}
+{% endblock %}
 
-<a href="{% url 'user_login' %}">Go to Login</a>
-
-</body>
-</html>
+{% block extra_js %}
+<script>
+    function copyId(id) {
+        navigator.clipboard.writeText(id).then(function () {
+            alert('Applicant ID copied to clipboard!');
+        }, function () {
+            // fallback
+            alert('Applicant ID: ' + id);
+        });
+    }
+</script>
+{% endblock %}
