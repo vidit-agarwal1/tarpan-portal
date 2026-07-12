@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
     <title>Beneficiary Details</title>
@@ -8,8 +7,13 @@
 
 <h1>Beneficiary Details</h1>
 
-<h2>Personal Information</h2>
+<a href="{% url 'edit_beneficiary' beneficiary.id %}">
+    <button>Edit Profile</button>
+</a>
 
+<hr>
+
+<h2>Personal Information</h2>
 <p>Name: {{ beneficiary.name }}</p>
 <p>Phone: {{ beneficiary.phone }}</p>
 <p>Email: {{ beneficiary.email }}</p>
@@ -22,7 +26,6 @@
 <hr>
 
 <h2>Education Information</h2>
-
 <p>College: {{ application.college_name }}</p>
 <p>Course: {{ application.course_name }}</p>
 <p>Academic Year: {{ application.academic_year }}</p>
@@ -30,7 +33,6 @@
 <hr>
 
 <h2>Support Information</h2>
-
 <p>Support Required: {{ application.support_required }}</p>
 <p>Family Income: {{ application.family_income }}</p>
 <p>Reason: {{ application.reason }}</p>
@@ -38,17 +40,15 @@
 <hr>
 
 <h2>Current Status</h2>
-
-<p>Status: {{ beneficiary.status }}</p>
+<p>Status: {{ beneficiary.get_status_display }}</p>
+<p>Applicant ID: {{ beneficiary.applicant_id }}</p>
 <p>Enrollment ID: {{ beneficiary.enrollment_id }}</p>
 
 {% if application.dynamic_fields.all %}
-<h3>Additional Information</h3>
+<hr>
+<h2>Additional Information</h2>
 <table border="1" cellpadding="8">
-    <tr>
-        <th>Field</th>
-        <th>Value</th>
-    </tr>
+    <tr><th>Field</th><th>Value</th></tr>
     {% for field in application.dynamic_fields.all %}
     <tr>
         <td>{{ field.field_name }}</td>
@@ -58,7 +58,48 @@
 </table>
 {% endif %}
 
+<hr>
+
+<h2>Documents</h2>
+
+<!-- Upload form -->
+<form method="post" action="{% url 'upload_document' beneficiary.id %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Document Title:</label><br>
+    <input type="text" name="title" placeholder="e.g. Birth Certificate" style="width: 300px;"><br><br>
+    <label>File:</label><br>
+    <input type="file" name="file"><br><br>
+    <button type="submit">Upload Document</button>
+</form>
+
+<br>
+
+<!-- Documents list -->
+{% if documents %}
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Title</th>
+        <th>Uploaded At</th>
+        <th>Download</th>
+        <th>Delete</th>
+    </tr>
+    {% for doc in documents %}
+    <tr>
+        <td>{{ doc.title }}</td>
+        <td>{{ doc.uploaded_at|date:"d M Y, H:i" }}</td>
+        <td><a href="{{ doc.file.url }}" target="_blank">Download</a></td>
+        <td>
+            <a href="{% url 'delete_document' doc.id %}"
+               onclick="return confirm('Delete this document?')">
+                Delete
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <p>No documents uploaded yet.</p>
+{% endif %}
 
 </body>
 </html>
-

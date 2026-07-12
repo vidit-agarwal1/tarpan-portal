@@ -130,6 +130,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # 1)
 # admin side - for each orphan, expenditure field
 # expenditure dashboard - sum total of all expenditures

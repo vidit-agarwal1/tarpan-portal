@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audit Logs</title>
+</head>
+<body>
+
+<h1>Audit Logs</h1>
+
+<a href="{% url 'admin_dashboard' %}">← Back to Dashboard</a>
+
+<hr>
+
+<!-- Search and filter -->
+<form method="get">
+    <input
+        type="text"
+        name="search"
+        placeholder="Search by beneficiary name"
+        value="{{ search }}"
+        style="width: 250px;"
+    >
+    &nbsp;
+    <select name="action">
+        <option value="">All Actions</option>
+        {% for value, label in action_choices %}
+            <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+        {% endfor %}
+    </select>
+    &nbsp;
+    <button type="submit">Filter</button>
+    <a href="{% url 'audit_logs' %}"><button type="button">Clear</button></a>
+</form>
+
+<br>
+
+{% if logs %}
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Date & Time</th>
+        <th>Beneficiary</th>
+        <th>Action</th>
+        <th>Description</th>
+    </tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.timestamp|date:"d M Y, H:i:s" }}</td>
+        <td>
+            {% if log.beneficiary %}
+                <a href="{% url 'beneficiary_detail' log.beneficiary.id %}">
+                    {{ log.beneficiary.name }}
+                </a>
+            {% else %}
+                Deleted
+            {% endif %}
+        </td>
+        <td>{{ log.get_action_display }}</td>
+        <td>{{ log.description }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <p>No logs found.</p>
+{% endif %}
+
+</body>
+</html>
