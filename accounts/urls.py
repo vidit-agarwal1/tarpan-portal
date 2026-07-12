@@ -20,6 +20,7 @@ urlpatterns = [
     path('beneficiary/<int:beneficiary_id>/edit/', views.edit_beneficiary, name='edit_beneficiary'),
     path('beneficiary/<int:beneficiary_id>/upload-document/', views.upload_document, name='upload_document'),
     path('document/<int:document_id>/delete/', views.delete_document, name='delete_document'),
+    path('audit-logs/', views.audit_logs, name='audit_logs'),
 
     # Admission form steps
     path('admission/personal/', views.admission_personal, name='admission_personal'),

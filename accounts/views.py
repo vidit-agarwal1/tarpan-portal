@@ -4,7 +4,7 @@ from datetime import date
 from django.db.models import Count
 import random
 import string
-from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument
+from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -105,6 +105,14 @@ def verify_application(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     beneficiary.status = 'VERIFIED'
     beneficiary.save()
+
+    # audit logs
+    AuditLog.objects.create(
+        beneficiary=beneficiary,
+        action='VERIFY',
+        description=f"Application for {beneficiary.name} was verified."
+    )
+
     return redirect('admission_applications')
 
 
@@ -113,6 +121,14 @@ def enroll_beneficiary(request, beneficiary_id):
     beneficiary.status = 'ENROLLED'
     beneficiary.enrollment_id = "TP2026" + str(beneficiary.id).zfill(3)
     beneficiary.save()
+
+    # audit logs
+    AuditLog.objects.create(
+        beneficiary=beneficiary,
+        action='ENROLL',
+        description=f"{beneficiary.name} was enrolled. Enrollment ID: {beneficiary.enrollment_id}."
+    )
+
     return redirect('verified_applications')
 
 
@@ -244,6 +260,11 @@ def edit_beneficiary(request, beneficiary_id):
     application = AdmissionApplication.objects.get(beneficiary=beneficiary)
 
     if request.method == "POST":
+
+        # capturing old values for the audit log
+        old_status = beneficiary.status
+        old_name = beneficiary.name
+
         # Personal details
         beneficiary.name         = request.POST.get('name')
         beneficiary.phone        = request.POST.get('phone')
@@ -265,6 +286,21 @@ def edit_beneficiary(request, beneficiary_id):
         application.family_income    = request.POST.get('family_income') or None
         application.reason           = request.POST.get('reason')
         application.save()
+
+        # Build a useful description for the audit logs
+        changes = []
+        if old_name != beneficiary.name:
+            changes.append(f"name changed from '{old_name}' to '{beneficiary.name}'")
+        if old_status != beneficiary.status:
+            changes.append(f"status changed from '{old_status}' to '{beneficiary.status}'")
+        if not changes:
+            changes.append("profile details updated")
+
+        AuditLog.objects.create(
+            beneficiary=beneficiary,
+            action='EDIT',
+            description=f"Profile edited for {beneficiary.name}: {', '.join(changes)}."
+        )
 
         return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
 
@@ -292,6 +328,12 @@ def upload_document(request, beneficiary_id):
                 file=file,
             )
 
+            AuditLog.objects.create(
+                beneficiary=beneficiary,
+                action='DOC_UPLOAD',
+                description=f"Document '{title}' uploaded for {beneficiary.name}."
+            )
+
     return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
 
 
@@ -300,6 +342,34 @@ def upload_document(request, beneficiary_id):
 def delete_document(request, document_id):
     doc = BeneficiaryDocument.objects.get(id=document_id)
     beneficiary_id = doc.beneficiary.id
+
+    AuditLog.objects.create(
+        beneficiary_id = beneficiary_id,
+        action='DOC_DELETE',
+        description=f"Document '{doc.title}' deleted from {beneficiary_id.name}'s profile."
+    )
+
     doc.file.delete()  # removes the actual file from disk
     doc.delete()
     return redirect('beneficiary_detail', beneficiary_id=beneficiary_id)
+
+def audit_logs(request):
+    logs = AuditLog.objects.select_related('beneficiary').all()
+
+    # Filter by beneficiary name if searched
+    search = request.GET.get('search', '').strip()
+    if search:
+        logs = logs.filter(beneficiary__name__icontains=search)
+
+    # Filter by action type if selected
+    action_filter = request.GET.get('action', '').strip()
+    if action_filter:
+        logs = logs.filter(action=action_filter)
+
+    context = {
+        'logs': logs,
+        'search': search,
+        'action_filter': action_filter,
+        'action_choices': AuditLog.ACTION_CHOICES,
+    }
+    return render(request, 'accounts/audit_logs.html', context)

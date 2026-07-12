@@ -122,3 +122,30 @@ class BeneficiaryDocument(models.Model):
 
     def __str__(self):
         return f"{self.beneficiary.name} - {self.title}"   
+
+class AuditLog(models.Model):
+
+    ACTION_CHOICES = [
+        ('VERIFY', 'Application Verified'),
+        ('ENROLL', 'Beneficiary Enrolled'),
+        ('EDIT', 'Profile Edited'),
+        ('DOC_UPLOAD', 'Document Uploaded'),
+        ('DOC_DELETE', 'Document Deleted'),
+    ]
+
+    beneficiary = models.ForeignKey(
+        Beneficiary,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='audit_logs'
+    )
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    description = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.timestamp} - {self.action} - {self.beneficiary}"
+
+    class Meta:
+        ordering = ['-timestamp']  # newest first
+        
