@@ -4,6 +4,7 @@ from datetime import date
 from django.db.models import Count
 import random
 import string
+from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -62,16 +63,18 @@ def user_dashboard(request):
     application = AdmissionApplication.objects.filter(
         beneficiary=beneficiary
     ).first()
+    documents = BeneficiaryDocument.objects.filter(beneficiary=beneficiary)
 
     context = {
         'beneficiary': beneficiary,
         'application': application,
+        'documents' : documents,
     }
 
     return render(request, 'accounts/user_dashboard.html', context)
 
 
-# ─── Admin views ─────────────────────────────────────────────
+#Admin views
 
 def admin_dashboard(request):
     context = {
@@ -116,11 +119,16 @@ def enroll_beneficiary(request, beneficiary_id):
 def beneficiary_detail(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     application = AdmissionApplication.objects.get(beneficiary=beneficiary)
-    context = {'beneficiary': beneficiary, 'application': application}
+    documents   = BeneficiaryDocument.objects.filter(beneficiary=beneficiary)
+    context = {
+        'beneficiary': beneficiary,
+        'application': application,
+        'documents': documents,
+    }
     return render(request, 'accounts/beneficiary_detail.html', context)
 
 
-# ─── Admission multi-step form ────────────────────────────────
+# Admission multi-step form
 
 def admission_personal(request):
     if request.method == "POST":
@@ -228,3 +236,70 @@ def application_submitted(request):
         'accounts/application_submitted.html',
         {'applicant_id': applicant_id}
     )
+
+# Admin: Edit beneficiary profile
+
+def edit_beneficiary(request, beneficiary_id):
+    beneficiary = Beneficiary.objects.get(id=beneficiary_id)
+    application = AdmissionApplication.objects.get(beneficiary=beneficiary)
+
+    if request.method == "POST":
+        # Personal details
+        beneficiary.name         = request.POST.get('name')
+        beneficiary.phone        = request.POST.get('phone')
+        beneficiary.email        = request.POST.get('email')
+        beneficiary.gender       = request.POST.get('gender')
+        beneficiary.date_of_birth = request.POST.get('dob') or None
+        beneficiary.address      = request.POST.get('address')
+        beneficiary.district     = request.POST.get('district')
+        beneficiary.category     = request.POST.get('category')
+        beneficiary.status       = request.POST.get('status')
+        beneficiary.enrollment_id = request.POST.get('enrollment_id')
+        beneficiary.save()
+
+        # Application details
+        application.college_name     = request.POST.get('college_name')
+        application.course_name      = request.POST.get('course_name')
+        application.academic_year    = request.POST.get('academic_year')
+        application.support_required = request.POST.get('support_required')
+        application.family_income    = request.POST.get('family_income') or None
+        application.reason           = request.POST.get('reason')
+        application.save()
+
+        return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
+
+    context = {
+        'beneficiary': beneficiary,
+        'application': application,
+        'status_choices': Beneficiary.STATUS_CHOICES,
+    }
+    return render(request, 'accounts/edit_beneficiary.html', context)
+
+
+# Admin: Upload document to beneficiary profile
+
+def upload_document(request, beneficiary_id):
+    beneficiary = Beneficiary.objects.get(id=beneficiary_id)
+
+    if request.method == "POST":
+        title = request.POST.get('title', '').strip()
+        file  = request.FILES.get('file')
+
+        if title and file:
+            BeneficiaryDocument.objects.create(
+                beneficiary=beneficiary,
+                title=title,
+                file=file,
+            )
+
+    return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
+
+
+#Admin: Delete document
+
+def delete_document(request, document_id):
+    doc = BeneficiaryDocument.objects.get(id=document_id)
+    beneficiary_id = doc.beneficiary.id
+    doc.file.delete()  # removes the actual file from disk
+    doc.delete()
+    return redirect('beneficiary_detail', beneficiary_id=beneficiary_id)

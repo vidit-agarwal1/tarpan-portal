@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+</head>
+<body>
+
+<h1>Edit Profile — {{ beneficiary.name }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <h3>Personal Details</h3>
+
+    <label>Full Name:</label><br>
+    <input type="text" name="name" value="{{ beneficiary.name }}"><br><br>
+
+    <label>Phone:</label><br>
+    <input type="text" name="phone" value="{{ beneficiary.phone }}"><br><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email" value="{{ beneficiary.email }}"><br><br>
+
+    <label>Gender:</label><br>
+    <input type="text" name="gender" value="{{ beneficiary.gender }}"><br><br>
+
+    <label>Date of Birth:</label><br>
+    <input type="date" name="dob" value="{{ beneficiary.date_of_birth|date:'Y-m-d' }}"><br><br>
+
+    <label>Address:</label><br>
+    <textarea name="address">{{ beneficiary.address }}</textarea><br><br>
+
+    <label>District:</label><br>
+    <input type="text" name="district" value="{{ beneficiary.district }}"><br><br>
+
+    <label>Category:</label><br>
+    <input type="text" name="category" value="{{ beneficiary.category }}"><br><br>
+
+    <h3>Status</h3>
+
+    <label>Status:</label><br>
+    <select name="status">
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if beneficiary.status == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Enrollment ID:</label><br>
+    <input type="text" name="enrollment_id" value="{{ beneficiary.enrollment_id }}"><br><br>
+
+    <h3>Application Details</h3>
+
+    <label>College Name:</label><br>
+    <input type="text" name="college_name" value="{{ application.college_name }}"><br><br>
+
+    <label>Course Name:</label><br>
+    <input type="text" name="course_name" value="{{ application.course_name }}"><br><br>
+
+    <label>Academic Year:</label><br>
+    <input type="text" name="academic_year" value="{{ application.academic_year }}"><br><br>
+
+    <label>Support Required:</label><br>
+    <textarea name="support_required">{{ application.support_required }}</textarea><br><br>
+
+    <label>Family Income:</label><br>
+    <input type="number" name="family_income" value="{{ application.family_income }}"><br><br>
+
+    <label>Reason for Assistance:</label><br>
+    <textarea name="reason">{{ application.reason }}</textarea><br><br>
+
+    <button type="submit">Save Changes</button>
+    <a href="{% url 'beneficiary_detail' beneficiary.id %}">
+        <button type="button">Cancel</button>
+    </a>
+
+</form>
+
+</body>
+</html>

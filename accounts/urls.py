@@ -17,6 +17,9 @@ urlpatterns = [
     path('verify-application/<int:beneficiary_id>/', views.verify_application, name='verify_application'),
     path('enroll-beneficiary/<int:beneficiary_id>/', views.enroll_beneficiary, name='enroll_beneficiary'),
     path('beneficiary/<int:beneficiary_id>/', views.beneficiary_detail, name='beneficiary_detail'),
+    path('beneficiary/<int:beneficiary_id>/edit/', views.edit_beneficiary, name='edit_beneficiary'),
+    path('beneficiary/<int:beneficiary_id>/upload-document/', views.upload_document, name='upload_document'),
+    path('document/<int:document_id>/delete/', views.delete_document, name='delete_document'),
 
     # Admission form steps
     path('admission/personal/', views.admission_personal, name='admission_personal'),
