@@ -1,44 +1,95 @@
-<!DOCTYPE html>
+{% extends 'accounts/base.html' %}
 
-<html>
-<head>
-    <title>Review Application</title>
-</head>
-<body>
+{% block title %}Review Application | Admission Form{% endblock %}
 
-<h1>Step 4 - Review Application</h1>
+{% block content %}
+<div class="fade-in" style="max-width: 700px; margin: 0 auto;">
+    
+    <!-- Progress Indicator -->
+    <div class="steps-indicator">
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble active">4</div>
+    </div>
+    
+    <div class="card">
+        <h2 class="card-title">
+            <i data-lucide="clipboard-list" style="color: var(--primary);"></i>
+            Step 4: Review Your Details
+        </h2>
+        <p class="text-secondary" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 2rem;">
+            Please carefully review your details before submitting. You cannot edit these once submitted.
+        </p>
 
-<h3>Personal Information</h3>
+        <!-- Personal Info Summary -->
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="user" style="width: 1.25rem; height: 1.25rem;"></i>
+                Personal Information
+            </h3>
+            <div class="grid-2 detail-list" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="detail-item"><span class="detail-label">Name:</span> <span class="detail-value">{{ data.name }}</span></div>
+                <div class="detail-item"><span class="detail-label">Phone:</span> <span class="detail-value">{{ data.phone }}</span></div>
+                <div class="detail-item"><span class="detail-label">Email:</span> <span class="detail-value">{{ data.email }}</span></div>
+                <div class="detail-item"><span class="detail-label">District:</span> <span class="detail-value">{{ data.district }}</span></div>
+            </div>
+        </div>
 
-<p><strong>Name:</strong> {{ data.name }}</p>
-<p><strong>Phone:</strong> {{ data.phone }}</p>
-<p><strong>Email:</strong> {{ data.email }}</p>
-<p><strong>District:</strong> {{ data.district }}</p>
+        <!-- Educational Info Summary -->
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="graduation-cap" style="width: 1.25rem; height: 1.25rem;"></i>
+                Educational Information
+            </h3>
+            <div class="grid-2 detail-list" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="detail-item"><span class="detail-label">College Name:</span> <span class="detail-value">{{ data.college_name }}</span></div>
+                <div class="detail-item"><span class="detail-label">Course:</span> <span class="detail-value">{{ data.course_name }}</span></div>
+                <div class="detail-item"><span class="detail-label">Academic Year:</span> <span class="detail-value">{{ data.academic_year }}</span></div>
+            </div>
+        </div>
 
-<h3>Educational Information</h3>
+        <!-- Support Info Summary -->
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="heart-handshake" style="width: 1.25rem; height: 1.25rem;"></i>
+                Assistance & Support
+            </h3>
+            <div class="detail-list">
+                <div class="detail-item"><span class="detail-label">Support Required:</span> <span class="detail-value">{{ data.support_required }}</span></div>
+                <div class="detail-item"><span class="detail-label">Family Income:</span> <span class="detail-value">INR {{ data.family_income }}</span></div>
+            </div>
+        </div>
 
-<p><strong>College:</strong> {{ data.college_name }}</p>
-<p><strong>Course:</strong> {{ data.course_name }}</p>
-<p><strong>Academic Year:</strong> {{ data.academic_year }}</p>
+        <!-- Custom Fields Summary -->
+        {% if data.dynamic_fields %}
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="file-plus" style="width: 1.25rem; height: 1.25rem;"></i>
+                Additional Details
+            </h3>
+            <div class="detail-list">
+                {% for field in data.dynamic_fields %}
+                    <div class="detail-item">
+                        <span class="detail-label">{{ field.name }}:</span> 
+                        <span class="detail-value">{{ field.value }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
-<h3>Support Information</h3>
-
-<p><strong>Support Required:</strong> {{ data.support_required }}</p>
-<p><strong>Family Income:</strong> {{ data.family_income }}</p>
-
-{% if data.dynamic_fields %}
-<h3>Additional Information</h3>
-{% for field in data.dynamic_fields %}
-    <p><strong>{{ field.name }}:</strong> {{ field.value }}</p>
-{% endfor %}
-{% endif %}
-
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">
-        Submit Application
-    </button>
-</form>
-
-</body>
-</html>
+        <form method="post" style="border-top: 1px solid var(--border); padding-top: 2rem;">
+            {% csrf_token %}
+            <div class="form-actions">
+                <a href="{% url 'admission_support' %}" class="btn btn-outline" style="margin-right: auto;">
+                    <i data-lucide="arrow-left"></i> Previous
+                </a>
+                <button type="submit" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">
+                    <i data-lucide="send"></i> Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

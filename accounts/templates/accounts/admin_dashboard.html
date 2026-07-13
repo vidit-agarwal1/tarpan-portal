@@ -1,66 +1,136 @@
-<!DOCTYPE html>
+{% extends 'accounts/base.html' %}
 
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
-<body>
+{% block title %}Admin Dashboard | Tarpan Foundation{% endblock %}
 
-<h1>Tarpan Admin Dashboard</h1>
+{% block nav_links %}
+<span class="nav-link active">
+    <i data-lucide="layout-dashboard"></i> Admin Dashboard
+</span>
+<a href="{% url 'audit_logs' %}" class="nav-link">
+    <i data-lucide="activity"></i> Audit Logs
+</a>
+<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Leave Console
+</a>
+{% endblock %}
 
-<hr>
+{% block content %}
+<div class="fade-in">
+    <!-- Page Title -->
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="shield-alert" style="color: var(--primary); width: 2.5rem; height: 2.5rem;"></i>
+            Tarpan Admin Console
+        </h1>
+        <p class="text-secondary" style="font-size: 1rem; margin-top: 0.25rem;">Monitor applications, verify credentials, and manage beneficiaries.</p>
+    </div>
 
-<h2>Overview</h2>
+    <!-- Metrics Cards Grid -->
+    <div class="grid-4" style="margin-bottom: 2.5rem;">
+        <!-- Total Beneficiaries -->
+        <div class="metric-card">
+            <div class="metric-icon-wrapper primary">
+                <i data-lucide="users"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Beneficiaries</span>
+                <span class="metric-value">{{ total_beneficiaries }}</span>
+            </div>
+        </div>
 
-<p>Total Beneficiaries: {{ total_beneficiaries }}</p>
+        <!-- Applied Queue -->
+        <a href="{% url 'admission_applications' %}" class="metric-card">
+            <div class="metric-icon-wrapper warning">
+                <i data-lucide="file-signature"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Applied Queue</span>
+                <span class="metric-value">{{ applied_count }}</span>
+            </div>
+        </a>
 
-<p>Admission Applications: {{ applied_count }}</p>
+        <!-- Verified Queue -->
+        <a href="{% url 'verified_applications' %}" class="metric-card">
+            <div class="metric-icon-wrapper info">
+                <i data-lucide="clipboard-check"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Verified Queue</span>
+                <span class="metric-value">{{ verified_count }}</span>
+            </div>
+        </a>
 
-<p>Verified Applications: {{ verified_count }}</p>
+        <!-- Enrolled Queue -->
+        <a href="{% url 'enrolled_beneficiaries' %}" class="metric-card">
+            <div class="metric-icon-wrapper secondary">
+                <i data-lucide="award"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Enrolled Queue</span>
+                <span class="metric-value">{{ enrolled_count }}</span>
+            </div>
+        </a>
+    </div>
 
-<p>Enrolled Beneficiaries: {{ enrolled_count }}</p>
+    <div class="grid-2">
+        <!-- Admission Workflow Section -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h3 class="card-title">
+                    <i data-lucide="git-merge" style="color: var(--primary);"></i>
+                    Admission Workflow
+                </h3>
+                <p class="text-secondary" style="font-size: 0.95rem; margin-bottom: 1.5rem; margin-top: -0.5rem;">
+                    Manage student applications from registration through verification to enrollment mapping.
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{% url 'admission_applications' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
+                        <i data-lucide="folder-open" style="color: var(--warning);"></i>
+                        <span style="flex-grow: 1;">1. Review New Applications</span>
+                        <span class="badge badge-applied" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">{{ applied_count }} pending</span>
+                    </a>
+                    
+                    <a href="{% url 'verified_applications' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
+                        <i data-lucide="user-check" style="color: var(--info);"></i>
+                        <span style="flex-grow: 1;">2. Map & Enroll Verified Candidates</span>
+                        <span class="badge badge-verified" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">{{ verified_count }} ready</span>
+                    </a>
+                    
+                    <a href="{% url 'enrolled_beneficiaries' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
+                        <i data-lucide="graduation-cap" style="color: var(--primary);"></i>
+                        <span style="flex-grow: 1;">3. View Active Beneficiaries</span>
+                        <span class="badge badge-enrolled" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">{{ enrolled_count }} active</span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-<hr>
+        <!-- Monitoring & Analytics Section -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h3 class="card-title">
+                    <i data-lucide="bar-chart-3" style="color: var(--secondary);"></i>
+                    Assistance Monitoring
+                </h3>
+                <p class="text-secondary" style="font-size: 0.95rem; margin-bottom: 1.5rem; margin-top: -0.5rem;">
+                    Monitor student academic performance, financial grants, and operational expenditures.
+                </p>
 
-<h3>Admission Workflow</h3>
+                    <div class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem; opacity: 0.65; cursor: not-allowed;" title="Section under development">
+                        <i data-lucide="wallet" style="color: var(--text-muted);"></i>
+                        <span style="flex-grow: 1;">Expenditure & Grants</span>
+                        <span class="badge badge-enquiry" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Draft</span>
+                    </div>
 
-<ul>
-    <li><a href="/admission-applications/">Admission Applications</a></li>
-
-```
-<li><a href="/verified-applications/">Verified Applications</a></li>
-
-<li><a href="/enrolled-beneficiaries/">Enrolled Beneficiaries</a></li>
-```
-
-</ul>
-
-<hr>
-
-<h3>Monitoring</h3>
-
-<ul>
-    <li><a href="/academic-monitoring/">Academic Monitoring</a></li>
-
-```
-<li><a href="/expenditure-monitoring/">Expenditure Monitoring</a></li>
-```
-
-</ul>
-
-<hr>
-
-<h3>Reports</h3>
-
-<ul>
-    <li><a href="/reports/">Reports</a></li>
-</ul>
-
-<h3>Audit Logs</h3>
-<ul>
-    <li><a href="{% url 'audit_logs' %}">View All Audit Logs</a></li>
-</ul>
-
-
-</body>
-</html>
+                    <a href="{% url 'audit_logs' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
+                        <i data-lucide="file-spreadsheet" style="color: var(--text-primary);"></i>
+                        <span style="flex-grow: 1;">Audit Log & Activity Logs</span>
+                        <i data-lucide="arrow-right" style="width: 1.1rem; height: 1.1rem; color: var(--text-muted);"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

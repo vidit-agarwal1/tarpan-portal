@@ -1,66 +1,158 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admission - Support Information</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Step 3 - Financial Assistance & Support</h1>
+{% block title %}Financial & Support Details | Admission Form{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
+{% block content %}
+<div class="fade-in" style="max-width: 650px; margin: 0 auto;">
+    
+    <!-- Progress Indicator -->
+    <div class="steps-indicator">
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble active">3</div>
+        <div class="step-bubble">4</div>
+    </div>
+    
+    <div class="card">
+        <h2 class="card-title">
+            <i data-lucide="heart-handshake" style="color: var(--primary);"></i>
+            Step 3: Assistance & Support
+        </h2>
+        <p class="text-secondary" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 2rem;">
+            Provide details about the financial support you need and the reasons for requesting it.
+        </p>
 
-    <label>Type of Support Required:</label><br>
-    <input type="text" name="support_required"><br><br>
+        <form method="post">
+            {% csrf_token %}
 
-    <label>Family Annual Income:</label><br>
-    <input type="number" name="family_income"><br><br>
+            <div class="form-group">
+                <label for="support_required">Type of Support Required</label>
+                <input 
+                    type="text" 
+                    id="support_required"
+                    name="support_required" 
+                    class="form-control" 
+                    placeholder="e.g. Tuition Fees, Hostel Accommodation, Books"
+                    value="{{ request.session.support_required|default:'' }}" 
+                    required
+                >
+            </div>
 
-    <label>Reason for Assistance:</label><br>
-    <textarea name="reason"></textarea><br><br>
+            <div class="form-group">
+                <label for="family_income">Family Annual Income (INR)</label>
+                <input 
+                    type="number" 
+                    id="family_income"
+                    name="family_income" 
+                    class="form-control" 
+                    placeholder="e.g. 150000"
+                    value="{{ request.session.family_income|default:'' }}" 
+                    required
+                >
+            </div>
 
-    <!-- ====== DYNAMIC FIELDS SECTION ====== -->
-    <h3>Additional Information (Optional)</h3>
-    <p>Add any extra details you'd like to share with the organization.</p>
+            <div class="form-group">
+                <label for="reason">Reason for Seeking Assistance</label>
+                <textarea 
+                    id="reason"
+                    name="reason" 
+                    class="form-control" 
+                    placeholder="Briefly describe your circumstances..."
+                    required
+                >{{ request.session.reason|default:'' }}</textarea>
+            </div>
 
-    <div id="dynamic-fields-container"></div>
+            <!-- ====== DYNAMIC FIELDS SECTION ====== -->
+            <div style="border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="plus-circle" style="color: var(--secondary);"></i>
+                    Additional Information (Optional)
+                </h3>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Add custom fields to share any other relevant details (e.g. Medical Condition, Father's Occupation).
+                </p>
 
-    <button type="button" onclick="addField()">+ Add a Field</button><br><br>
-    <!-- ====================================== -->
+                <div id="dynamic-fields-container" style="margin-bottom: 1rem;">
+                    {% if request.session.dynamic_fields %}
+                        {% for field in request.session.dynamic_fields %}
+                            <div class="dynamic-field-row" id="field-row-{{ forloop.counter }}">
+                                <input
+                                    type="text"
+                                    name="field_names[]"
+                                    class="form-control"
+                                    placeholder="Label (e.g. Guardian's Job)"
+                                    value="{{ field.name }}"
+                                    required
+                                />
+                                <input
+                                    type="text"
+                                    name="field_values[]"
+                                    class="form-control"
+                                    placeholder="Value"
+                                    value="{{ field.value }}"
+                                    required
+                                />
+                                <button type="button" class="btn btn-outline btn-sm btn-danger" onclick="removeField({{ forloop.counter }})">
+                                    <i data-lucide="trash-2" style="width: 1.1rem; height: 1.1rem;"></i>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
 
-    <button type="submit">Review Application</button>
-</form>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addField()" style="color: var(--secondary); border-color: var(--secondary); background-color: var(--secondary-light);">
+                    <i data-lucide="plus"></i> Add Custom Field
+                </button>
+            </div>
+            <!-- ====================================== -->
 
+            <div class="form-actions">
+                <a href="{% url 'admission_education' %}" class="btn btn-outline" style="margin-right: auto;">
+                    <i data-lucide="arrow-left"></i> Previous
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Review Application <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-    let fieldCount = 0;
+    let fieldCount = {% if request.session.dynamic_fields %}{{ request.session.dynamic_fields|length }}{% else %}0{% endif %};
 
     function addField() {
         fieldCount++;
         const container = document.getElementById('dynamic-fields-container');
 
         const row = document.createElement('div');
+        row.className = 'dynamic-field-row';
         row.id = 'field-row-' + fieldCount;
-        row.style.marginBottom = '10px';
 
         row.innerHTML = `
             <input
                 type="text"
                 name="field_names[]"
-                placeholder="Field label (e.g. Medical Condition)"
-                style="width: 220px;"
+                class="form-control"
+                placeholder="Label (e.g. Father's Job)"
+                required
             />
-            &nbsp;
             <input
                 type="text"
                 name="field_values[]"
-                placeholder="Your answer (text, numbers, sentences)"
-                style="width: 320px;"
+                class="form-control"
+                placeholder="Value"
+                required
             />
-            &nbsp;
-            <button type="button" onclick="removeField(${fieldCount})">Remove</button>
+            <button type="button" class="btn btn-outline btn-sm btn-danger" onclick="removeField(${fieldCount})">
+                <i data-lucide="trash-2" style="width: 1.1rem; height: 1.1rem;"></i>
+            </button>
         `;
 
         container.appendChild(row);
+        lucide.createIcons(); // Initialize the newly added garbage bin icon
     }
 
     function removeField(id) {
@@ -68,6 +160,4 @@
         if (row) row.remove();
     }
 </script>
-
-</body>
-</html>
+{% endblock %}

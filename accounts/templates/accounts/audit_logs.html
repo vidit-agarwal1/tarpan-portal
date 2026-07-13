@@ -1,69 +1,125 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Audit Logs</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Audit Logs</h1>
+{% block title %}Audit Logs | Tarpan Admin{% endblock %}
 
-<a href="{% url 'admin_dashboard' %}">← Back to Dashboard</a>
+{% block nav_links %}
+<a href="{% url 'admin_dashboard' %}" class="nav-link">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+</a>
+<span class="nav-link active">
+    <i data-lucide="activity"></i> Audit Logs
+</span>
+<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Leave
+</a>
+{% endblock %}
 
-<hr>
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.75rem; font-weight: 800;">System Audit Logs</h2>
+            <p class="text-secondary" style="font-size: 0.95rem;">Track modifications, uploads, and status changes across the portal.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline btn-sm">
+            <i data-lucide="arrow-left"></i> Dashboard Console
+        </a>
+    </div>
 
-<!-- Search and filter -->
-<form method="get">
-    <input
-        type="text"
-        name="search"
-        placeholder="Search by beneficiary name"
-        value="{{ search }}"
-        style="width: 250px;"
-    >
-    &nbsp;
-    <select name="action">
-        <option value="">All Actions</option>
-        {% for value, label in action_choices %}
-            <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>
-                {{ label }}
-            </option>
-        {% endfor %}
-    </select>
-    &nbsp;
-    <button type="submit">Filter</button>
-    <a href="{% url 'audit_logs' %}"><button type="button">Clear</button></a>
-</form>
-
-<br>
-
-{% if logs %}
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Date & Time</th>
-        <th>Beneficiary</th>
-        <th>Action</th>
-        <th>Description</th>
-    </tr>
-    {% for log in logs %}
-    <tr>
-        <td>{{ log.timestamp|date:"d M Y, H:i:s" }}</td>
-        <td>
-            {% if log.beneficiary %}
-                <a href="{% url 'beneficiary_detail' log.beneficiary.id %}">
-                    {{ log.beneficiary.name }}
+    <!-- Search and Filter Panel -->
+    <div class="filter-bar">
+        <form method="get" class="flex gap-4">
+            <div class="filter-input">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by student name..."
+                    value="{{ search }}"
+                >
+            </div>
+            
+            <div class="filter-select">
+                <select name="action" class="form-control">
+                    <option value="">All Action Types</option>
+                    {% for value, label in action_choices %}
+                        <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-secondary btn-sm" style="padding: 0.75rem 1.25rem;">
+                    <i data-lucide="filter" style="width: 1rem; height: 1rem;"></i> Apply Filter
+                </button>
+                <a href="{% url 'audit_logs' %}" class="btn btn-outline btn-sm" style="padding: 0.75rem 1.25rem; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                    Clear
                 </a>
-            {% else %}
-                Deleted
-            {% endif %}
-        </td>
-        <td>{{ log.get_action_display }}</td>
-        <td>{{ log.description }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-    <p>No logs found.</p>
-{% endif %}
+            </div>
+        </form>
+    </div>
 
-</body>
-</html>
+    <!-- Logs Table Card -->
+    <div class="card" style="padding: 1.5rem 1rem;">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Date & Time</th>
+                        <th style="width: 25%;">Student Profile</th>
+                        <th style="width: 20%;">Action Category</th>
+                        <th style="width: 35%;">Detailed Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="text-secondary" style="font-size: 0.85rem; font-weight: 500;">
+                            {{ log.timestamp|date:"d M Y, H:i:s" }}
+                        </td>
+                        <td style="font-weight: 600;">
+                            {% if log.beneficiary %}
+                                <a href="{% url 'beneficiary_detail' log.beneficiary.id %}" style="display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+                                    <i data-lucide="user" style="width: 1rem; height: 1rem; color: var(--text-muted);"></i>
+                                    {{ log.beneficiary.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted" style="display: inline-flex; align-items: center; gap: 0.4rem; font-style: italic;">
+                                    <i data-lucide="user-x" style="width: 1rem; height: 1rem;"></i>
+                                    Deleted Profile
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if log.action == 'VERIFY' %}badge-verified
+                                {% elif log.action == 'ENROLL' %}badge-enrolled
+                                {% elif log.action == 'DOC_UPLOAD' %}badge-academic
+                                {% elif log.action == 'DOC_DELETE' %}badge-danger
+                                {% else %}badge-applied{% endif %}" 
+                                style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">
+                            {{ log.description }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 1.5rem;">
+            <i data-lucide="activity-square" style="width: 3rem; height: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem;">No Log Entries Found</h3>
+            <p class="text-secondary" style="font-size: 0.9rem;">No matching logs found in the system for your current filter query.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,81 +1,161 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Profile</title>
-</head>
-<body>
+{% extends 'accounts/base.html' %}
 
-<h1>Edit Profile — {{ beneficiary.name }}</h1>
+{% block title %}Edit Profile | Tarpan Admin{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
+{% block nav_links %}
+<a href="{% url 'admin_dashboard' %}" class="nav-link">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+</a>
+<a href="{% url 'beneficiary_detail' beneficiary.id %}" class="nav-link">
+    <i data-lucide="arrow-left"></i> Profile
+</a>
+<span class="nav-link active">
+    <i data-lucide="user-cog"></i> Edit Profile
+</span>
+{% endblock %}
 
-    <h3>Personal Details</h3>
+{% block content %}
+<div class="fade-in" style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="font-size: 1.75rem; font-weight: 800;">Edit Profile</h2>
+            <p class="text-secondary" style="font-size: 0.95rem;">Modify candidate records, program statuses, or application details.</p>
+        </div>
+        <a href="{% url 'beneficiary_detail' beneficiary.id %}" class="btn btn-outline btn-sm">
+            Cancel
+        </a>
+    </div>
 
-    <label>Full Name:</label><br>
-    <input type="text" name="name" value="{{ beneficiary.name }}"><br><br>
+    <form method="post">
+        {% csrf_token %}
 
-    <label>Phone:</label><br>
-    <input type="text" name="phone" value="{{ beneficiary.phone }}"><br><br>
+        <!-- SECTION 1: Personal Details -->
+        <div class="card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                <i data-lucide="user" style="width: 1.25rem; height: 1.25rem;"></i>
+                Personal Demographics
+            </h3>
+            
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ beneficiary.name }}" required>
+            </div>
 
-    <label>Email:</label><br>
-    <input type="email" name="email" value="{{ beneficiary.email }}"><br><br>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" value="{{ beneficiary.phone }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ beneficiary.email }}" required>
+                </div>
+            </div>
 
-    <label>Gender:</label><br>
-    <input type="text" name="gender" value="{{ beneficiary.gender }}"><br><br>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <input type="text" id="gender" name="gender" class="form-control" value="{{ beneficiary.gender }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" class="form-control" value="{{ beneficiary.date_of_birth|date:'Y-m-d' }}" required>
+                </div>
+            </div>
 
-    <label>Date of Birth:</label><br>
-    <input type="date" name="dob" value="{{ beneficiary.date_of_birth|date:'Y-m-d' }}"><br><br>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" class="form-control" required>{{ beneficiary.address }}</textarea>
+            </div>
 
-    <label>Address:</label><br>
-    <textarea name="address">{{ beneficiary.address }}</textarea><br><br>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" name="district" class="form-control" value="{{ beneficiary.district }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" class="form-control" value="{{ beneficiary.category }}" required>
+                </div>
+            </div>
+        </div>
 
-    <label>District:</label><br>
-    <input type="text" name="district" value="{{ beneficiary.district }}"><br><br>
+        <!-- SECTION 2: Program Status mapping -->
+        <div class="card" style="padding: 2rem; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                <i data-lucide="shield-check" style="width: 1.25rem; height: 1.25rem;"></i>
+                Program Status & Mapping
+            </h3>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="status">Program Status</label>
+                    <select id="status" name="status" class="form-control">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if beneficiary.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="enrollment_id">Enrollment ID</label>
+                    <input type="text" id="enrollment_id" name="enrollment_id" class="form-control" value="{{ beneficiary.enrollment_id|default:'' }}" placeholder="e.g. TP2026001">
+                </div>
+            </div>
+        </div>
 
-    <label>Category:</label><br>
-    <input type="text" name="category" value="{{ beneficiary.category }}"><br><br>
+        <!-- SECTION 3: Application details -->
+        <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                <i data-lucide="graduation-cap" style="width: 1.25rem; height: 1.25rem;"></i>
+                Application & Course details
+            </h3>
 
-    <h3>Status</h3>
+            <div class="form-group">
+                <label for="college_name">College / Institution Name</label>
+                <input type="text" id="college_name" name="college_name" class="form-control" value="{{ application.college_name }}" required>
+            </div>
 
-    <label>Status:</label><br>
-    <select name="status">
-        {% for value, label in status_choices %}
-            <option value="{{ value }}" {% if beneficiary.status == value %}selected{% endif %}>
-                {{ label }}
-            </option>
-        {% endfor %}
-    </select><br><br>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="course_name">Course / Program</label>
+                    <input type="text" id="course_name" name="course_name" class="form-control" value="{{ application.course_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="academic_year">Academic Year</label>
+                    <input type="text" id="academic_year" name="academic_year" class="form-control" value="{{ application.academic_year }}" required>
+                </div>
+            </div>
 
-    <label>Enrollment ID:</label><br>
-    <input type="text" name="enrollment_id" value="{{ beneficiary.enrollment_id }}"><br><br>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="family_income">Family Annual Income (INR)</label>
+                    <input type="number" id="family_income" name="family_income" class="form-control" value="{{ application.family_income|stringformat:'.0f' }}" required>
+                </div>
+            </div>
 
-    <h3>Application Details</h3>
+            <div class="form-group">
+                <label for="support_required">Requested Support Description</label>
+                <textarea id="support_required" name="support_required" class="form-control" required>{{ application.support_required }}</textarea>
+            </div>
 
-    <label>College Name:</label><br>
-    <input type="text" name="college_name" value="{{ application.college_name }}"><br><br>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="reason">Reason for Seeking Assistance</label>
+                <textarea id="reason" name="reason" class="form-control" required>{{ application.reason }}</textarea>
+            </div>
+        </div>
 
-    <label>Course Name:</label><br>
-    <input type="text" name="course_name" value="{{ application.course_name }}"><br><br>
-
-    <label>Academic Year:</label><br>
-    <input type="text" name="academic_year" value="{{ application.academic_year }}"><br><br>
-
-    <label>Support Required:</label><br>
-    <textarea name="support_required">{{ application.support_required }}</textarea><br><br>
-
-    <label>Family Income:</label><br>
-    <input type="number" name="family_income" value="{{ application.family_income }}"><br><br>
-
-    <label>Reason for Assistance:</label><br>
-    <textarea name="reason">{{ application.reason }}</textarea><br><br>
-
-    <button type="submit">Save Changes</button>
-    <a href="{% url 'beneficiary_detail' beneficiary.id %}">
-        <button type="button">Cancel</button>
-    </a>
-
-</form>
-
-</body>
-</html>
+        <!-- Submission actions -->
+        <div class="card" style="padding: 1.25rem 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="{% url 'beneficiary_detail' beneficiary.id %}" class="btn btn-outline">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
