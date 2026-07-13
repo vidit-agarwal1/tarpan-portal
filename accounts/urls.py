@@ -19,7 +19,9 @@ urlpatterns = [
     path('beneficiary/<int:beneficiary_id>/', views.beneficiary_detail, name='beneficiary_detail'),
     path('beneficiary/<int:beneficiary_id>/edit/', views.edit_beneficiary, name='edit_beneficiary'),
     path('beneficiary/<int:beneficiary_id>/upload-document/', views.upload_document, name='upload_document'),
+    path('beneficiary/<int:beneficiary_id>/add-funding/', views.add_funding, name='add_funding'),
     path('document/<int:document_id>/delete/', views.delete_document, name='delete_document'),
+    path('funding/<int:entry_id>/delete/', views.delete_funding, name='delete_funding'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
 
     # Admission form steps

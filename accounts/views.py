@@ -4,7 +4,7 @@ from datetime import date
 from django.db.models import Count
 import random
 import string
-from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog
+from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog, FundingEntry
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -30,20 +30,32 @@ def user_login(request):
     error = None
 
     if request.method == "POST":
-        applicant_id = request.POST.get('applicant_id', '').strip()
-        dob_input    = request.POST.get('dob', '').strip()
+        login_id  = request.POST.get('applicant_id', '').strip()
+        dob_input = request.POST.get('dob', '').strip()
+
+        # Try matching applicant_id first, then enrollment_id
+        beneficiary = None
 
         try:
-            beneficiary = Beneficiary.objects.get(applicant_id=applicant_id)
+            beneficiary = Beneficiary.objects.get(applicant_id=login_id)
         except Beneficiary.DoesNotExist:
-            error = "Invalid Applicant ID or Date of Birth."
+            pass
+
+        if beneficiary is None:
+            try:
+                beneficiary = Beneficiary.objects.get(enrollment_id=login_id)
+            except Beneficiary.DoesNotExist:
+                pass
+
+        if beneficiary is None:
+            error = "Invalid ID or Date of Birth."
             return render(request, 'accounts/user_login.html', {'error': error})
 
         if str(beneficiary.date_of_birth) == dob_input:
             request.session['logged_in_applicant_id'] = beneficiary.applicant_id
             return redirect('user_dashboard')
         else:
-            error = "Invalid Applicant ID or Date of Birth."
+            error = "Invalid ID or Date of Birth."
 
     return render(request, 'accounts/user_login.html', {'error': error})
 
@@ -64,11 +76,14 @@ def user_dashboard(request):
         beneficiary=beneficiary
     ).first()
     documents = BeneficiaryDocument.objects.filter(beneficiary=beneficiary)
+    funding_entries = FundingEntry.objects.filter(beneficiary=beneficiary)
+    total_funding = sum(e.amount for e in funding_entries)
 
     context = {
         'beneficiary': beneficiary,
         'application': application,
         'documents' : documents,
+        'total_funding' : total_funding,
     }
 
     return render(request, 'accounts/user_dashboard.html', context)
@@ -136,10 +151,15 @@ def beneficiary_detail(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     application = AdmissionApplication.objects.get(beneficiary=beneficiary)
     documents   = BeneficiaryDocument.objects.filter(beneficiary=beneficiary)
+    funding_entries = FundingEntry.objects.filter(beneficiary=beneficiary)
+    total_funding = sum(e.amount for e in funding_entries)
+
     context = {
         'beneficiary': beneficiary,
         'application': application,
         'documents': documents,
+        'funding_entries' : funding_entries,
+        'total_funding' : total_funding,
     }
     return render(request, 'accounts/beneficiary_detail.html', context)
 
@@ -373,3 +393,47 @@ def audit_logs(request):
         'action_choices': AuditLog.ACTION_CHOICES,
     }
     return render(request, 'accounts/audit_logs.html', context)
+
+# ─── Admin: Add funding entry ─────────────────────────────────
+
+def add_funding(request, beneficiary_id):
+    beneficiary = Beneficiary.objects.get(id=beneficiary_id)
+
+    if request.method == "POST":
+        purpose = request.POST.get('purpose', '').strip()
+        amount  = request.POST.get('amount', '').strip()
+        date_input = request.POST.get('date', '').strip()
+        note    = request.POST.get('note', '').strip()
+
+        if purpose and amount and date_input:
+            entry = FundingEntry.objects.create(
+                beneficiary=beneficiary,
+                purpose=purpose,
+                amount=amount,
+                date=date_input,
+                note=note or None,
+            )
+
+            AuditLog.objects.create(
+                beneficiary=beneficiary,
+                action='FUNDING',
+                description=f"Funding entry added for {beneficiary.name}: ₹{amount} for {purpose} on {date_input}."
+            )
+
+    return redirect('beneficiary_detail', beneficiary_id=beneficiary_id)
+
+
+# ─── Admin: Delete funding entry ──────────────────────────────
+
+def delete_funding(request, entry_id):
+    entry = FundingEntry.objects.get(id=entry_id)
+    beneficiary = entry.beneficiary
+
+    AuditLog.objects.create(
+        beneficiary=beneficiary,
+        action='FUNDING',
+        description=f"Funding entry deleted for {beneficiary.name}: ₹{entry.amount} for {entry.purpose} on {entry.date}."
+    )
+
+    entry.delete()
+    return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
