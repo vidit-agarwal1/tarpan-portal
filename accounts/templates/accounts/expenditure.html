@@ -1,0 +1,219 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Expenditure & Grants | Tarpan Admin{% endblock %}
+
+{% block nav_links %}
+<a href="{% url 'admin_dashboard' %}" class="nav-link">
+    <i data-lucide="layout-dashboard"></i> Dashboard
+</a>
+<span class="nav-link active">
+    <i data-lucide="wallet"></i> Expenditure & Grants
+</span>
+<a href="{% url 'audit_logs' %}" class="nav-link">
+    <i data-lucide="activity"></i> Audit Logs
+</a>
+<a href="{% url 'admin_logout' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Logout
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
+            <i data-lucide="wallet" style="color: var(--primary); width: 2.5rem; height: 2.5rem;"></i>
+            Expenditure & Grants
+        </h1>
+        <p class="text-secondary" style="font-size: 1rem; margin-top: 0.25rem;">
+            Overview of all funding disbursed across beneficiaries.
+        </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid-4" style="margin-bottom: 2.5rem;">
+        <div class="metric-card">
+            <div class="metric-icon-wrapper primary">
+                <i data-lucide="indian-rupee"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Disbursed</span>
+                <span class="metric-value">₹{{ total_funding }}</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon-wrapper secondary">
+                <i data-lucide="users"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Beneficiaries Funded</span>
+                <span class="metric-value">{{ funded_count }}</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon-wrapper warning">
+                <i data-lucide="list"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Total Entries</span>
+                <span class="metric-value">{{ total_entries }}</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon-wrapper info">
+                <i data-lucide="tag"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-label">Unique Categories</span>
+                <span class="metric-value">{{ unique_purposes }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2" style="align-items: start; gap: 2rem;">
+
+        <!-- Per-beneficiary breakdown -->
+        <div class="card" style="padding: 2rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="users" style="color: var(--primary);"></i>
+                Funding Per Beneficiary
+            </h3>
+
+            {% if beneficiary_totals %}
+            <div class="table-responsive" style="margin-bottom: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Beneficiary</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Total Funded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in beneficiary_totals %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'beneficiary_detail' row.beneficiary.id %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                    {{ row.beneficiary.name }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if row.beneficiary.status == 'APPLIED' %}badge-applied
+                                    {% elif row.beneficiary.status == 'VERIFIED' %}badge-verified
+                                    {% elif row.beneficiary.status == 'ENROLLED' %}badge-enrolled
+                                    {% elif row.beneficiary.status == 'JOB' %}badge-job
+                                    {% elif row.beneficiary.status == 'COMPLETED' %}badge-completed
+                                    {% else %}badge-enquiry{% endif %}">
+                                    {{ row.beneficiary.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="text-align: right; font-weight: 700; color: var(--primary);">
+                                ₹{{ row.total }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; border: 2px dashed var(--border); border-radius: var(--radius-md);">
+                <i data-lucide="indian-rupee" style="width: 2.5rem; height: 2.5rem; color: var(--text-muted); margin-bottom: 0.5rem;"></i>
+                <p class="text-secondary" style="font-size: 0.9rem;">No funding entries recorded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Per-purpose breakdown -->
+        <div class="card" style="padding: 2rem;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="tag" style="color: var(--primary);"></i>
+                Funding By Purpose
+            </h3>
+
+            {% if purpose_totals %}
+            <div class="table-responsive" style="margin-bottom: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Purpose</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in purpose_totals %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ row.purpose }}</td>
+                            <td style="text-align: right; font-weight: 700; color: var(--primary);">
+                                ₹{{ row.total }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr style="border-top: 2px solid var(--border);">
+                            <td style="font-weight: 700; padding-top: 0.75rem;">Grand Total</td>
+                            <td style="text-align: right; font-weight: 800; color: var(--primary); font-size: 1.1rem; padding-top: 0.75rem;">
+                                ₹{{ total_funding }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 2rem; border: 2px dashed var(--border); border-radius: var(--radius-md);">
+                <p class="text-secondary" style="font-size: 0.9rem;">No funding entries recorded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- All entries table -->
+    <div class="card" style="padding: 2rem; margin-top: 2rem;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="list" style="color: var(--primary);"></i>
+            All Funding Entries
+        </h3>
+
+        {% if all_entries %}
+        <div class="table-responsive" style="margin-bottom: 0;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Beneficiary</th>
+                        <th>Purpose</th>
+                        <th>Note</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in all_entries %}
+                    <tr>
+                        <td class="text-secondary" style="font-size: 0.85rem;">{{ entry.date|date:"d M Y" }}</td>
+                        <td>
+                            <a href="{% url 'beneficiary_detail' entry.beneficiary.id %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                                {{ entry.beneficiary.name }}
+                            </a>
+                        </td>
+                        <td style="font-weight: 600;">{{ entry.purpose }}</td>
+                        <td class="text-secondary" style="font-size: 0.85rem;">{{ entry.note|default:"—" }}</td>
+                        <td style="text-align: right; font-weight: 700; color: var(--primary);">₹{{ entry.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; border: 2px dashed var(--border); border-radius: var(--radius-md);">
+            <p class="text-secondary" style="font-size: 0.9rem;">No funding entries recorded yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

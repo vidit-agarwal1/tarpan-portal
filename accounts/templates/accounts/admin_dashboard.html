@@ -9,8 +9,13 @@
 <a href="{% url 'audit_logs' %}" class="nav-link">
     <i data-lucide="activity"></i> Audit Logs
 </a>
-<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
-    <i data-lucide="log-out"></i> Leave Console
+{% if admin_username %}
+<span class="nav-link" style="opacity: 0.7; font-size: 0.85rem;">
+    <i data-lucide="user-check"></i> {{ admin_username }}
+</span>
+{% endif %}
+<a href="{% url 'admin_logout' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Logout
 </a>
 {% endblock %}
 
@@ -117,11 +122,11 @@
                     Monitor student academic performance, financial grants, and operational expenditures.
                 </p>
 
-                    <div class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem; opacity: 0.65; cursor: not-allowed;" title="Section under development">
-                        <i data-lucide="wallet" style="color: var(--text-muted);"></i>
-                        <span style="flex-grow: 1;">Expenditure & Grants</span>
-                        <span class="badge badge-enquiry" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Draft</span>
-                    </div>
+                <a href="{% url 'expenditure' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
+                    <i data-lucide="wallet" style="color: var(--primary);"></i>
+                    <span style="flex-grow: 1;">Total Expenditure & Grants</span>
+                    <span style="font-weight: 800; color: var(--primary); font-size: 1rem;">₹{{ total_funding }}</span>
+                </a>
 
                     <a href="{% url 'audit_logs' %}" class="btn btn-outline" style="justify-content: flex-start; text-align: left; padding: 1rem 1.25rem;">
                         <i data-lucide="file-spreadsheet" style="color: var(--text-primary);"></i>

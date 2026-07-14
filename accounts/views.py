@@ -4,7 +4,7 @@ from datetime import date
 from django.db.models import Count
 import random
 import string
-from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog, FundingEntry
+from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog, FundingEntry, AdminAccount
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -16,6 +16,14 @@ def generate_applicant_id():
         candidate = f"TAR-{suffix}"
         if not Beneficiary.objects.filter(applicant_id=candidate).exists():
             return candidate
+        
+def admin_login_required(view_func):
+    """Decorator to protect admin views."""
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('admin_logged_in'):
+            return redirect('admin_login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 # ─── Public pages ────────────────────────────────────────────
@@ -90,32 +98,41 @@ def user_dashboard(request):
 
 
 #Admin views
-
+@admin_login_required
 def admin_dashboard(request):
+    from django.db.models import Sum
+
+    total_funding = FundingEntry.objects.aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+
     context = {
         'total_beneficiaries': Beneficiary.objects.count(),
         'applied_count':  Beneficiary.objects.filter(status='APPLIED').count(),
         'verified_count': Beneficiary.objects.filter(status='VERIFIED').count(),
         'enrolled_count': Beneficiary.objects.filter(status='ENROLLED').count(),
+        'total_funding':  total_funding,
+        'admin_username': request.session.get('admin_username'),
     }
     return render(request, 'accounts/admin_dashboard.html', context)
 
-
+@admin_login_required
 def admission_applications(request):
     context = {'applications': Beneficiary.objects.filter(status='APPLIED')}
     return render(request, 'accounts/admission_applications.html', context)
 
-
+@admin_login_required
 def verified_applications(request):
     context = {'applications': Beneficiary.objects.filter(status='VERIFIED')}
     return render(request, 'accounts/verified_applications.html', context)
 
-
+@admin_login_required
 def enrolled_beneficiaries(request):
     context = {'beneficiaries': Beneficiary.objects.filter(status='ENROLLED')}
     return render(request, 'accounts/enrolled_beneficiaries.html', context)
 
 
+@admin_login_required
 def verify_application(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     beneficiary.status = 'VERIFIED'
@@ -130,7 +147,7 @@ def verify_application(request, beneficiary_id):
 
     return redirect('admission_applications')
 
-
+@admin_login_required
 def enroll_beneficiary(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     beneficiary.status = 'ENROLLED'
@@ -146,7 +163,7 @@ def enroll_beneficiary(request, beneficiary_id):
 
     return redirect('verified_applications')
 
-
+@admin_login_required
 def beneficiary_detail(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     application = AdmissionApplication.objects.get(beneficiary=beneficiary)
@@ -165,7 +182,6 @@ def beneficiary_detail(request, beneficiary_id):
 
 
 # Admission multi-step form
-
 def admission_personal(request):
     if request.method == "POST":
         request.session['name']     = request.POST.get('name')
@@ -274,7 +290,7 @@ def application_submitted(request):
     )
 
 # Admin: Edit beneficiary profile
-
+@admin_login_required
 def edit_beneficiary(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
     application = AdmissionApplication.objects.get(beneficiary=beneficiary)
@@ -333,7 +349,7 @@ def edit_beneficiary(request, beneficiary_id):
 
 
 # Admin: Upload document to beneficiary profile
-
+@admin_login_required
 def upload_document(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
 
@@ -358,7 +374,7 @@ def upload_document(request, beneficiary_id):
 
 
 #Admin: Delete document
-
+@admin_login_required
 def delete_document(request, document_id):
     doc = BeneficiaryDocument.objects.get(id=document_id)
     beneficiary_id = doc.beneficiary.id
@@ -373,6 +389,7 @@ def delete_document(request, document_id):
     doc.delete()
     return redirect('beneficiary_detail', beneficiary_id=beneficiary_id)
 
+@admin_login_required
 def audit_logs(request):
     logs = AuditLog.objects.select_related('beneficiary').all()
 
@@ -395,7 +412,7 @@ def audit_logs(request):
     return render(request, 'accounts/audit_logs.html', context)
 
 # ─── Admin: Add funding entry ─────────────────────────────────
-
+@admin_login_required
 def add_funding(request, beneficiary_id):
     beneficiary = Beneficiary.objects.get(id=beneficiary_id)
 
@@ -424,7 +441,7 @@ def add_funding(request, beneficiary_id):
 
 
 # ─── Admin: Delete funding entry ──────────────────────────────
-
+@admin_login_required
 def delete_funding(request, entry_id):
     entry = FundingEntry.objects.get(id=entry_id)
     beneficiary = entry.beneficiary
@@ -437,3 +454,76 @@ def delete_funding(request, entry_id):
 
     entry.delete()
     return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
+
+# Expenditure and grants monitoring
+@admin_login_required
+def expenditure(request):
+    from django.db.models import Sum
+
+    all_entries = FundingEntry.objects.select_related('beneficiary').all()
+
+    total_funding  = all_entries.aggregate(total=Sum('amount'))['total'] or 0
+    total_entries  = all_entries.count()
+    unique_purposes = all_entries.values('purpose').distinct().count()
+    funded_count   = all_entries.values('beneficiary').distinct().count()
+
+    # Total per beneficiary
+    beneficiary_ids = all_entries.values_list('beneficiary', flat=True).distinct()
+    beneficiary_totals = []
+    for bid in beneficiary_ids:
+        beneficiary = Beneficiary.objects.get(id=bid)
+        total = all_entries.filter(beneficiary=beneficiary).aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        beneficiary_totals.append({'beneficiary': beneficiary, 'total': total})
+
+    beneficiary_totals.sort(key=lambda x: x['total'], reverse=True)
+
+    # Total per purpose
+    purpose_totals = []
+    for purpose in all_entries.values_list('purpose', flat=True).distinct():
+        total = all_entries.filter(purpose=purpose).aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        purpose_totals.append({'purpose': purpose, 'total': total})
+
+    purpose_totals.sort(key=lambda x: x['total'], reverse=True)
+
+    context = {
+        'all_entries':        all_entries,
+        'total_funding':      total_funding,
+        'total_entries':      total_entries,
+        'unique_purposes':    unique_purposes,
+        'funded_count':       funded_count,
+        'beneficiary_totals': beneficiary_totals,
+        'purpose_totals':     purpose_totals,
+    }
+    return render(request, 'accounts/expenditure.html', context)
+
+# ─── Admin login ─────────────────────────────────────────────
+
+def admin_login(request):
+    error = None
+
+    if request.method == "POST":
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        try:
+            admin = AdminAccount.objects.get(username=username)
+            if admin.check_password(password):
+                request.session['admin_logged_in'] = True
+                request.session['admin_username']  = admin.username
+                return redirect('admin_dashboard')
+            else:
+                error = "Invalid username or password."
+        except AdminAccount.DoesNotExist:
+            error = "Invalid username or password."
+
+    return render(request, 'accounts/admin_login.html', {'error': error})
+
+
+def admin_logout(request):
+    request.session.pop('admin_logged_in', None)
+    request.session.pop('admin_username', None)
+    return redirect('admin_login')

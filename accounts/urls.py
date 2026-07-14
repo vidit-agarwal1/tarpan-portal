@@ -9,6 +9,10 @@ urlpatterns = [
     path('user-logout/', views.user_logout, name='user_logout'),
     path('user-dashboard/', views.user_dashboard, name='user_dashboard'),
 
+    # Admin login
+    path('admin-login/', views.admin_login, name='admin_login'),
+    path('admin-logout/', views.admin_logout, name='admin_logout'),
+
     # Admin
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admission-applications/', views.admission_applications, name='admission_applications'),
@@ -23,6 +27,7 @@ urlpatterns = [
     path('document/<int:document_id>/delete/', views.delete_document, name='delete_document'),
     path('funding/<int:entry_id>/delete/', views.delete_funding, name='delete_funding'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
+    path('expenditure/', views.expenditure, name = 'expenditure'),
 
     # Admission form steps
     path('admission/personal/', views.admission_personal, name='admission_personal'),
