@@ -32,7 +32,7 @@ def home(request):
     return render(request, 'accounts/home.html')
 
 
-# ─── User login flow ─────────────────────────────────────────
+# User login flow 
 
 def user_login(request):
     error = None
@@ -41,32 +41,43 @@ def user_login(request):
         login_id  = request.POST.get('applicant_id', '').strip()
         dob_input = request.POST.get('dob', '').strip()
 
-        # Try matching applicant_id first, then enrollment_id
         beneficiary = None
 
+        # Try applicant_id first
         try:
             beneficiary = Beneficiary.objects.get(applicant_id=login_id)
         except Beneficiary.DoesNotExist:
             pass
 
+        # Try enrollment_id second
         if beneficiary is None:
             try:
                 beneficiary = Beneficiary.objects.get(enrollment_id=login_id)
             except Beneficiary.DoesNotExist:
                 pass
 
+        # Try email third
         if beneficiary is None:
-            error = "Invalid ID or Date of Birth."
+            try:
+                beneficiary = Beneficiary.objects.get(email=login_id)
+            except Beneficiary.DoesNotExist:
+                pass
+            except Beneficiary.MultipleObjectsReturned:
+                # Two applicants with same email — fall back to ID login
+                error = "Multiple accounts found with this email. Please log in with your Applicant ID instead."
+                return render(request, 'accounts/user_login.html', {'error': error})
+
+        if beneficiary is None:
+            error = "Invalid ID, email, or Date of Birth."
             return render(request, 'accounts/user_login.html', {'error': error})
 
         if str(beneficiary.date_of_birth) == dob_input:
             request.session['logged_in_applicant_id'] = beneficiary.applicant_id
             return redirect('user_dashboard')
         else:
-            error = "Invalid ID or Date of Birth."
+            error = "Invalid ID, email, or Date of Birth."
 
     return render(request, 'accounts/user_login.html', {'error': error})
-
 
 def user_logout(request):
     request.session.pop('logged_in_applicant_id', None)
@@ -142,7 +153,8 @@ def verify_application(request, beneficiary_id):
     AuditLog.objects.create(
         beneficiary=beneficiary,
         action='VERIFY',
-        description=f"Application for {beneficiary.name} was verified."
+        description=f"Application for {beneficiary.name} was verified.",
+        performed_by = request.session.get('admin_username')
     )
 
     return redirect('admission_applications')
@@ -158,7 +170,8 @@ def enroll_beneficiary(request, beneficiary_id):
     AuditLog.objects.create(
         beneficiary=beneficiary,
         action='ENROLL',
-        description=f"{beneficiary.name} was enrolled. Enrollment ID: {beneficiary.enrollment_id}."
+        description=f"{beneficiary.name} was enrolled. Enrollment ID: {beneficiary.enrollment_id}.",
+        performed_by = request.session.get('admin_username')
     )
 
     return redirect('verified_applications')
@@ -212,6 +225,15 @@ def admission_support(request):
         request.session['family_income']     = request.POST.get('family_income')
         request.session['reason']            = request.POST.get('reason')
 
+        # Bank details
+        request.session['bank_account_number']          = request.POST.get('bank_account_number')
+        request.session['bank_ifsc_code']               = request.POST.get('bank_ifsc_code', '').upper()
+        request.session['bank_name']                    = request.POST.get('bank_name')
+        request.session['bank_branch_name']             = request.POST.get('bank_branch_name')
+        request.session['bank_account_holder_relation'] = request.POST.get('bank_account_holder_relation')
+        request.session['bank_notes']                   = request.POST.get('bank_notes')
+
+
         field_names  = request.POST.getlist('field_names[]')
         field_values = request.POST.getlist('field_values[]')
 
@@ -239,6 +261,14 @@ def admission_review(request):
         'support_required': request.session.get('support_required'),
         'family_income':    request.session.get('family_income'),
         'dynamic_fields':   request.session.get('dynamic_fields', []),
+
+        # Bank details
+        'bank_account_number':          request.session.get('bank_account_number'),
+        'bank_ifsc_code':               request.session.get('bank_ifsc_code'),
+        'bank_name':                    request.session.get('bank_name'),
+        'bank_branch_name':             request.session.get('bank_branch_name'),
+        'bank_account_holder_relation': request.session.get('bank_account_holder_relation'),
+        'bank_notes':                   request.session.get('bank_notes'),
     }
 
     if request.method == "POST":
@@ -265,6 +295,14 @@ def admission_review(request):
             support_required=request.session.get('support_required'),
             family_income=request.session.get('family_income'),
             reason=request.session.get('reason'),
+
+            # Bank details
+            bank_account_number=request.session.get('bank_account_number'),
+            bank_ifsc_code=request.session.get('bank_ifsc_code'),
+            bank_name=request.session.get('bank_name'),
+            bank_branch_name=request.session.get('bank_branch_name'),
+            bank_account_holder_relation=request.session.get('bank_account_holder_relation'),
+            bank_notes=request.session.get('bank_notes'),
         )
 
         for field in request.session.get('dynamic_fields', []):
@@ -335,7 +373,8 @@ def edit_beneficiary(request, beneficiary_id):
         AuditLog.objects.create(
             beneficiary=beneficiary,
             action='EDIT',
-            description=f"Profile edited for {beneficiary.name}: {', '.join(changes)}."
+            description=f"Profile edited for {beneficiary.name}: {', '.join(changes)}.",
+            performed_by = request.session.get('admin_username'),
         )
 
         return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
@@ -367,7 +406,8 @@ def upload_document(request, beneficiary_id):
             AuditLog.objects.create(
                 beneficiary=beneficiary,
                 action='DOC_UPLOAD',
-                description=f"Document '{title}' uploaded for {beneficiary.name}."
+                description=f"Document '{title}' uploaded for {beneficiary.name}.",
+                performed_by = request.session.get('admin_username')
             )
 
     return redirect('beneficiary_detail', beneficiary_id=beneficiary.id)
@@ -382,7 +422,8 @@ def delete_document(request, document_id):
     AuditLog.objects.create(
         beneficiary_id = beneficiary_id,
         action='DOC_DELETE',
-        description=f"Document '{doc.title}' deleted from {beneficiary_id.name}'s profile."
+        description=f"Document '{doc.title}' deleted from {beneficiary_id.name}'s profile.",
+        performed_by = request.session.get('admin_username')
     )
 
     doc.file.delete()  # removes the actual file from disk
@@ -434,7 +475,8 @@ def add_funding(request, beneficiary_id):
             AuditLog.objects.create(
                 beneficiary=beneficiary,
                 action='FUNDING',
-                description=f"Funding entry added for {beneficiary.name}: ₹{amount} for {purpose} on {date_input}."
+                description=f"Funding entry added for {beneficiary.name}: ₹{amount} for {purpose} on {date_input}.",
+                performed_by = request.session.get('admin_username')
             )
 
     return redirect('beneficiary_detail', beneficiary_id=beneficiary_id)
@@ -449,7 +491,8 @@ def delete_funding(request, entry_id):
     AuditLog.objects.create(
         beneficiary=beneficiary,
         action='FUNDING',
-        description=f"Funding entry deleted for {beneficiary.name}: ₹{entry.amount} for {entry.purpose} on {entry.date}."
+        description=f"Funding entry deleted for {beneficiary.name}: ₹{entry.amount} for {entry.purpose} on {entry.date}.",
+        performed_by = request.session.get('admin_username')
     )
 
     entry.delete()

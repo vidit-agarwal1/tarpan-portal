@@ -9,14 +9,14 @@
 <span class="nav-link active">
     <i data-lucide="award"></i> Enrolled List
 </span>
-<a href="{% url 'home' %}" class="nav-link nav-btn-logout">
-    <i data-lucide="log-out"></i> Leave
+<a href="{% url 'admin_logout' %}" class="nav-link nav-btn-logout">
+    <i data-lucide="log-out"></i> Logout
 </a>
 {% endblock %}
 
 {% block content %}
 <div class="fade-in">
-    <!-- Back Header -->
+    <!-- Header -->
     <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h2 style="font-size: 1.75rem; font-weight: 800;">Enrolled Beneficiaries</h2>
@@ -29,9 +29,26 @@
 
     <!-- Table Card -->
     <div class="card" style="padding: 1.5rem 1rem;">
+
         {% if beneficiaries %}
+        <!-- Search Bar -->
+        <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+            <div style="position: relative; flex: 1; max-width: 400px;">
+                <i data-lucide="search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 1rem; height: 1rem; color: var(--text-muted);"></i>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="form-control"
+                    placeholder="Search by name or enrollment ID..."
+                    style="padding-left: 2.25rem;"
+                    oninput="filterTable()"
+                >
+            </div>
+            <span id="resultCount" class="text-secondary" style="font-size: 0.85rem;"></span>
+        </div>
+
         <div class="table-responsive">
-            <table class="table">
+            <table class="table" id="enrolledTable">
                 <thead>
                     <tr>
                         <th>Beneficiary Name</th>
@@ -40,7 +57,7 @@
                         <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     {% for beneficiary in beneficiaries %}
                     <tr>
                         <td style="font-weight: 600;">
@@ -65,6 +82,13 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- No results message -->
+        <div id="noResults" style="display: none; text-align: center; padding: 2rem;">
+            <i data-lucide="search-x" style="width: 2.5rem; height: 2.5rem; color: var(--text-muted); margin-bottom: 0.5rem;"></i>
+            <p class="text-secondary" style="font-size: 0.9rem;">No beneficiaries match your search.</p>
+        </div>
+
         {% else %}
         <div style="text-align: center; padding: 3rem 1.5rem;">
             <i data-lucide="user-x" style="width: 3rem; height: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
@@ -72,6 +96,30 @@
             <p class="text-secondary" style="font-size: 0.9rem;">No active students mapped to program enrollment databases yet.</p>
         </div>
         {% endif %}
+
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterTable() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const rows  = document.querySelectorAll('#tableBody tr');
+        let visible = 0;
+
+        rows.forEach(row => {
+            // Search across all cells in the row
+            const text = row.textContent.toLowerCase();
+            const match = text.includes(query);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        document.getElementById('resultCount').textContent =
+            query ? `${visible} result${visible !== 1 ? 's' : ''} found` : '';
+        document.getElementById('noResults').style.display =
+            visible === 0 && query ? 'block' : 'none';
+    }
+</script>
 {% endblock %}

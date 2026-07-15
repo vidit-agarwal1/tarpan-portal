@@ -36,3 +36,15 @@ urlpatterns = [
     path('admission/review/', views.admission_review, name='admission_review'),
     path('admission/submitted/', views.application_submitted, name='application_submitted'),
 ]
+
+"""
+notice before submitting
+make fields compulsory
+bank details tab
+add adminUser to audit logs
+add email to applicant login
+DONE
+5 categories initially
+documents tab - aadhar card, cwc certifate, orphan certificate, profile photo
+OPTIONAL LIST - birth certificate, leaving certificate 10th and 12th, ration card, driver's license
+"""

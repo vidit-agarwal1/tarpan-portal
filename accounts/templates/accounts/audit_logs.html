@@ -70,6 +70,7 @@
                 <thead>
                     <tr>
                         <th style="width: 20%;">Date & Time</th>
+                        <th style="width: 20%;">Performed by</th>
                         <th style="width: 25%;">Student Profile</th>
                         <th style="width: 20%;">Action Category</th>
                         <th style="width: 35%;">Detailed Description</th>
@@ -80,6 +81,15 @@
                     <tr>
                         <td class="text-secondary" style="font-size: 0.85rem; font-weight: 500;">
                             {{ log.timestamp|date:"d M Y, H:i:s" }}
+                        </td>
+                        <td>
+                            {% if log.performed_by %}
+                                <span style="font-family: monospace; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600;">
+                                    {{ log.performed_by }}
+                                </span>
+                            {% else %}
+                                <span class="text-secondary" style="font-size: 0.85rem;">—</span>
+                            {% endif %}
                         </td>
                         <td style="font-weight: 600;">
                             {% if log.beneficiary %}
