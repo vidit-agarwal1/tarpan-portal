@@ -92,10 +92,17 @@ class AdmissionApplication(models.Model):
 
     approved = models.BooleanField(default=False)
 
+    # Bank Details
+    bank_account_number = models.CharField(max_length=30, blank=True, null=True)
+    bank_ifsc_code      = models.CharField(max_length=20, blank=True, null=True)
+    bank_name           = models.CharField(max_length=200, blank=True, null=True)
+    bank_branch_name    = models.CharField(max_length=200, blank=True, null=True)
+    bank_account_holder_relation = models.CharField(max_length=100, blank=True, null=True)
+    bank_notes          = models.TextField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.beneficiary.name} - {self.course_name}"
     
-# Add this below your AdmissionApplication model
 
 class DynamicField(models.Model):
     application = models.ForeignKey(
@@ -142,9 +149,14 @@ class AuditLog(models.Model):
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    performed_by = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True  
+    )
 
     def __str__(self):
-        return f"{self.timestamp} - {self.action} - {self.beneficiary}"
+        return f"{self.timestamp} - {self.action} - {self.beneficiary} - {self.performed_by}"
 
     class Meta:
         ordering = ['-timestamp']  # newest first

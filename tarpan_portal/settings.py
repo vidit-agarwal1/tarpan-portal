@@ -143,3 +143,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # 3) 
 # interactive parts - admin analytics dashboard
 
+"""
+Things added:
+1. Warning notice before submitting the application
+2. Applicant login through email
+3. Addition of compulsory fields and starr marks
+4. Bank details tab
+5. Admin profile visibility in audit logs (can see which admin performed which action)
+6. Search using name or enrollment ID in applied, verified and enrolled beneficiaries in the admin console
+"""

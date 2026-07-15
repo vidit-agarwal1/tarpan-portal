@@ -16,17 +16,21 @@
     <div class="card">
         <h2 class="card-title">
             <i data-lucide="heart-handshake" style="color: var(--primary);"></i>
-            Step 3: Assistance & Support
+            Step 3: Assistance, Support & Bank Details
         </h2>
         <p class="text-secondary" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 2rem;">
-            Provide details about the financial support you need and the reasons for requesting it.
+            Provide details about the financial support you need and your bank account for disbursements.
         </p>
 
         <form method="post">
             {% csrf_token %}
 
+            <!-- Support Details -->
             <div class="form-group">
-                <label for="support_required">Type of Support Required</label>
+                <label for="support_required">
+                    Type of Support Required
+                    <span style="color: red;">*</span>
+                </label>
                 <input 
                     type="text" 
                     id="support_required"
@@ -39,7 +43,10 @@
             </div>
 
             <div class="form-group">
-                <label for="family_income">Family Annual Income (INR)</label>
+                <label for="family_income">
+                    Family Annual Income (INR)
+                    <span style="color: red;">*</span>
+                </label>
                 <input 
                     type="number" 
                     id="family_income"
@@ -52,7 +59,10 @@
             </div>
 
             <div class="form-group">
-                <label for="reason">Reason for Seeking Assistance</label>
+                <label for="reason">
+                    Reason for Seeking Assistance
+                    <span style="color: red;">*</span>
+                </label>
                 <textarea 
                     id="reason"
                     name="reason" 
@@ -62,7 +72,112 @@
                 >{{ request.session.reason|default:'' }}</textarea>
             </div>
 
-            <!-- ====== DYNAMIC FIELDS SECTION ====== -->
+            <!-- Bank Details Section -->
+            <div style="border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="landmark" style="color: var(--primary);"></i>
+                    Bank Account Details
+                    <span style="color: red; font-size: 0.85rem; margin-left: 0.25rem;">* Required</span>
+                </h3>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    This information is required for disbursement of funds. Please ensure accuracy.
+                </p>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="bank_account_number">
+                            Account Number
+                            <span style="color: red;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="bank_account_number"
+                            name="bank_account_number"
+                            class="form-control"
+                            placeholder="e.g. 012345678901"
+                            value="{{ request.session.bank_account_number|default:'' }}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="bank_ifsc_code">
+                            IFSC Code
+                            <span style="color: red;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="bank_ifsc_code"
+                            name="bank_ifsc_code"
+                            class="form-control"
+                            placeholder="e.g. SBIN0001234"
+                            value="{{ request.session.bank_ifsc_code|default:'' }}"
+                            style="text-transform: uppercase;"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="bank_name">
+                            Bank Name
+                            <span style="color: red;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="bank_name"
+                            name="bank_name"
+                            class="form-control"
+                            placeholder="e.g. State Bank of India"
+                            value="{{ request.session.bank_name|default:'' }}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="bank_branch_name">
+                            Branch Name
+                            <span style="color: red;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="bank_branch_name"
+                            name="bank_branch_name"
+                            class="form-control"
+                            placeholder="e.g. Andheri West Branch"
+                            value="{{ request.session.bank_branch_name|default:'' }}"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bank_account_holder_relation">
+                        Relation to Account Holder
+                        <span style="color: red;">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="bank_account_holder_relation"
+                        name="bank_account_holder_relation"
+                        class="form-control"
+                        placeholder="e.g. Self, Father, Mother, Guardian"
+                        value="{{ request.session.bank_account_holder_relation|default:'' }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="bank_notes">Additional Bank Notes (Optional)</label>
+                    <textarea
+                        id="bank_notes"
+                        name="bank_notes"
+                        class="form-control"
+                        placeholder="Any additional information about the bank account..."
+                    >{{ request.session.bank_notes|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Dynamic Fields Section -->
             <div style="border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; margin-bottom: 1.5rem;">
                 <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
                     <i data-lucide="plus-circle" style="color: var(--secondary);"></i>
@@ -82,7 +197,6 @@
                                     class="form-control"
                                     placeholder="Label (e.g. Guardian's Job)"
                                     value="{{ field.name }}"
-                                    required
                                 />
                                 <input
                                     type="text"
@@ -90,7 +204,6 @@
                                     class="form-control"
                                     placeholder="Value"
                                     value="{{ field.value }}"
-                                    required
                                 />
                                 <button type="button" class="btn btn-outline btn-sm btn-danger" onclick="removeField({{ forloop.counter }})">
                                     <i data-lucide="trash-2" style="width: 1.1rem; height: 1.1rem;"></i>
@@ -104,7 +217,6 @@
                     <i data-lucide="plus"></i> Add Custom Field
                 </button>
             </div>
-            <!-- ====================================== -->
 
             <div class="form-actions">
                 <a href="{% url 'admission_education' %}" class="btn btn-outline" style="margin-right: auto;">
@@ -126,33 +238,18 @@
     function addField() {
         fieldCount++;
         const container = document.getElementById('dynamic-fields-container');
-
         const row = document.createElement('div');
         row.className = 'dynamic-field-row';
         row.id = 'field-row-' + fieldCount;
-
         row.innerHTML = `
-            <input
-                type="text"
-                name="field_names[]"
-                class="form-control"
-                placeholder="Label (e.g. Father's Job)"
-                required
-            />
-            <input
-                type="text"
-                name="field_values[]"
-                class="form-control"
-                placeholder="Value"
-                required
-            />
+            <input type="text" name="field_names[]" class="form-control" placeholder="Label (e.g. Father's Job)" />
+            <input type="text" name="field_values[]" class="form-control" placeholder="Value" />
             <button type="button" class="btn btn-outline btn-sm btn-danger" onclick="removeField(${fieldCount})">
                 <i data-lucide="trash-2" style="width: 1.1rem; height: 1.1rem;"></i>
             </button>
         `;
-
         container.appendChild(row);
-        lucide.createIcons(); // Initialize the newly added garbage bin icon
+        lucide.createIcons();
     }
 
     function removeField(id) {
