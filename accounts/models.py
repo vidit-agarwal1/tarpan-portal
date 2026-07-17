@@ -193,4 +193,20 @@ class AdminAccount(models.Model):
         return check_password(raw_password, self.password)
 
     def __str__(self):
-        return self.username        
+        return self.username
+    
+    
+# Documents for the applicant
+class ApplicationDocument(models.Model):
+    application = models.ForeignKey(
+        'AdmissionApplication',
+        on_delete=models.CASCADE,
+        related_name='application_documents'
+    )
+    title = models.CharField(max_length=200)
+    file  = models.FileField(upload_to='application_documents/')
+    is_mandatory = models.BooleanField(default=False)
+    uploaded_at  = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.application.beneficiary.name} - {self.title}"        

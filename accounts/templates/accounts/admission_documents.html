@@ -1,0 +1,148 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Upload Documents | Admission Form{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 650px; margin: 0 auto;">
+
+    <!-- Progress Indicator — now 5 steps -->
+    <div class="steps-indicator">
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble active">4</div>
+        <div class="step-bubble">5</div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">
+            <i data-lucide="file-up" style="color: var(--primary);"></i>
+            Step 4: Upload Documents
+        </h2>
+        <p class="text-secondary" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 2rem;">
+            Upload all required documents. These will be reviewed by the admin team during verification.
+        </p>
+
+        {% if error %}
+        <div style="background: #fff0f0; border: 1px solid #ffcccc; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1.5rem; color: #cc0000; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="alert-circle" style="width: 1rem; height: 1rem; flex-shrink: 0;"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Mandatory Documents -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="shield-check" style="color: var(--primary); width: 1.15rem; height: 1.15rem;"></i>
+                    Mandatory Documents
+                    <span style="color: red; font-size: 0.82rem;">* All required</span>
+                </h3>
+                <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 1.25rem;">
+                    All five documents below must be uploaded to proceed.
+                </p>
+
+                <div class="form-group">
+                    <label>CWC Certificate <span style="color: red;">*</span></label>
+                    <input type="file" name="cwc_certificate" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Aadhar Card <span style="color: red;">*</span></label>
+                    <input type="file" name="aadhar_card" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Orphanage Certificate <span style="color: red;">*</span></label>
+                    <input type="file" name="orphanage_certificate" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>PAN Card <span style="color: red;">*</span></label>
+                    <input type="file" name="pan_card" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Passport Photo <span style="color: red;">*</span></label>
+                    <input type="file" name="passport_photo" class="form-control" accept="image/*" required>
+                </div>
+            </div>
+
+            <!-- Optional Additional Documents -->
+            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="plus-circle" style="color: var(--secondary); width: 1.15rem; height: 1.15rem;"></i>
+                    Additional Documents (Optional)
+                </h3>
+                <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 1.25rem;">
+                    You may also upload other supporting documents such as Birth Certificate, 10th/12th Leaving Certificate, Ration Card, etc.
+                </p>
+
+                <div id="extra-docs-container" style="margin-bottom: 1rem;"></div>
+
+                <button type="button" class="btn btn-outline btn-sm" onclick="addExtraDoc()" style="color: var(--secondary); border-color: var(--secondary); background-color: var(--secondary-light);">
+                    <i data-lucide="plus"></i> Add Another Document
+                </button>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'admission_support' %}" class="btn btn-outline" style="margin-right: auto;">
+                    <i data-lucide="arrow-left"></i> Previous
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Review Application <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let extraDocCount = 0;
+
+    function addExtraDoc() {
+        extraDocCount++;
+        const container = document.getElementById('extra-docs-container');
+        const row = document.createElement('div');
+        row.id = 'extra-doc-' + extraDocCount;
+        row.style.cssText = 'background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 0.75rem;';
+        row.innerHTML = `
+            <div class="grid-2" style="gap: 0.75rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.82rem;">Document Title</label>
+                    <input
+                        type="text"
+                        name="extra_doc_titles[]"
+                        class="form-control"
+                        placeholder="e.g. Birth Certificate"
+                    />
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.82rem;">File</label>
+                    <input
+                        type="file"
+                        name="extra_doc_files[]"
+                        class="form-control"
+                    />
+                </div>
+            </div>
+            <div style="text-align: right; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-outline btn-sm btn-danger" onclick="removeExtraDoc(${extraDocCount})">
+                    <i data-lucide="trash-2" style="width: 0.9rem; height: 0.9rem;"></i> Remove
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+        lucide.createIcons();
+    }
+
+    function removeExtraDoc(id) {
+        const row = document.getElementById('extra-doc-' + id);
+        if (row) row.remove();
+    }
+</script>
+{% endblock %}

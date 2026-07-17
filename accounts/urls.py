@@ -27,23 +27,18 @@ urlpatterns = [
     path('document/<int:document_id>/delete/', views.delete_document, name='delete_document'),
     path('funding/<int:entry_id>/delete/', views.delete_funding, name='delete_funding'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
-    path('expenditure/', views.expenditure, name = 'expenditure'),
+    path('expenditure/', views.expenditure, name='expenditure'),
 
     # Admission form steps
     path('admission/personal/', views.admission_personal, name='admission_personal'),
     path('admission/education/', views.admission_education, name='admission_education'),
     path('admission/support/', views.admission_support, name='admission_support'),
+    path('admission/documents/', views.admission_documents, name='admission_documents'),
     path('admission/review/', views.admission_review, name='admission_review'),
     path('admission/submitted/', views.application_submitted, name='application_submitted'),
 ]
 
 """
-notice before submitting
-make fields compulsory
-bank details tab
-add adminUser to audit logs
-add email to applicant login
-DONE
 5 categories initially
 documents tab - aadhar card, cwc certifate, orphan certificate, profile photo
 OPTIONAL LIST - birth certificate, leaving certificate 10th and 12th, ration card, driver's license
