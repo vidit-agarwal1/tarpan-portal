@@ -10,13 +10,14 @@
         <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
         <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
         <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
-        <div class="step-bubble active">4</div>
+        <div class="step-bubble completed"><i data-lucide="check" style="width: 1.1rem; height: 1.1rem;"></i></div>
+        <div class="step-bubble active">5</div>
     </div>
     
     <div class="card">
         <h2 class="card-title">
             <i data-lucide="clipboard-list" style="color: var(--primary);"></i>
-            Step 4: Review Your Details
+            Step 5: Review Your Details
         </h2>
         <p class="text-secondary" style="font-size: 0.9rem; margin-top: -1rem; margin-bottom: 2rem;">
             Please carefully review your details before submitting. You cannot edit these once submitted.
@@ -79,6 +80,32 @@
             </div>
         </div>
 
+        <!-- Documents Summary -->
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="file-up" style="width: 1.25rem; height: 1.25rem;"></i>
+                Uploaded Documents
+            </h3>
+            {% if data.staged_docs %}
+            <div class="detail-list">
+                {% for doc in data.staged_docs %}
+                <div class="detail-item" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="{% if doc.is_mandatory %}shield-check{% else %}file{% endif %}"
+                    style="width: 1rem; height: 1rem; color: {% if doc.is_mandatory %}var(--primary){% else %}var(--text-muted){% endif %}; flex-shrink: 0;"></i>
+                    <span class="detail-value">{{ doc.title }}</span>
+                    {% if doc.is_mandatory %}
+                        <span style="font-size: 0.75rem; color: var(--primary); background: var(--primary-light); padding: 0.1rem 0.4rem; border-radius: 999px;">Required</span>
+                    {% else %}
+                        <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--background); padding: 0.1rem 0.4rem; border-radius: 999px; border: 1px solid var(--border);">Optional</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary" style="font-size: 0.9rem;">No documents staged.</p>
+            {% endif %}
+        </div>
+
         <!-- Custom Fields Summary -->
         {% if data.dynamic_fields %}
         <div style="margin-bottom: 2rem;">
@@ -112,7 +139,7 @@
             </div>
         
             <div class="form-actions">
-                <a href="{% url 'admission_support' %}" class="btn btn-outline" style="margin-right: auto;">
+                <a href="{% url 'admission_documents' %}" class="btn btn-outline" style="margin-right: auto;">
                     <i data-lucide="arrow-left"></i> Previous
                 </a>
                 <button type="submit" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">

@@ -4,7 +4,7 @@ from datetime import date
 from django.db.models import Count
 import random
 import string
-from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog, FundingEntry, AdminAccount
+from .models import Beneficiary, AdmissionApplication, DynamicField, BeneficiaryDocument, AuditLog, FundingEntry, AdminAccount, ApplicationDocument
 
 
 # ─── Helpers ────────────────────────────────────────────────
@@ -225,14 +225,12 @@ def admission_support(request):
         request.session['family_income']     = request.POST.get('family_income')
         request.session['reason']            = request.POST.get('reason')
 
-        # Bank details
         request.session['bank_account_number']          = request.POST.get('bank_account_number')
         request.session['bank_ifsc_code']               = request.POST.get('bank_ifsc_code', '').upper()
         request.session['bank_name']                    = request.POST.get('bank_name')
         request.session['bank_branch_name']             = request.POST.get('bank_branch_name')
         request.session['bank_account_holder_relation'] = request.POST.get('bank_account_holder_relation')
         request.session['bank_notes']                   = request.POST.get('bank_notes')
-
 
         field_names  = request.POST.getlist('field_names[]')
         field_values = request.POST.getlist('field_values[]')
@@ -245,7 +243,8 @@ def admission_support(request):
                 dynamic_fields.append({'name': name, 'value': value})
 
         request.session['dynamic_fields'] = dynamic_fields
-        return redirect('admission_review')
+        return redirect('admission_documents')  # ← changed from admission_review
+
     return render(request, 'accounts/admission_support.html')
 
 
@@ -261,14 +260,13 @@ def admission_review(request):
         'support_required': request.session.get('support_required'),
         'family_income':    request.session.get('family_income'),
         'dynamic_fields':   request.session.get('dynamic_fields', []),
-
-        # Bank details
         'bank_account_number':          request.session.get('bank_account_number'),
         'bank_ifsc_code':               request.session.get('bank_ifsc_code'),
         'bank_name':                    request.session.get('bank_name'),
         'bank_branch_name':             request.session.get('bank_branch_name'),
         'bank_account_holder_relation': request.session.get('bank_account_holder_relation'),
         'bank_notes':                   request.session.get('bank_notes'),
+        'staged_docs':      request.session.get('staged_docs', []),
     }
 
     if request.method == "POST":
@@ -283,7 +281,7 @@ def admission_review(request):
             address=request.session.get('address'),
             category=request.session.get('category'),
             status='APPLIED',
-            applicant_id=generate_applicant_id(),  # ← generated here
+            applicant_id=generate_applicant_id(),
         )
 
         application = AdmissionApplication.objects.create(
@@ -295,8 +293,6 @@ def admission_review(request):
             support_required=request.session.get('support_required'),
             family_income=request.session.get('family_income'),
             reason=request.session.get('reason'),
-
-            # Bank details
             bank_account_number=request.session.get('bank_account_number'),
             bank_ifsc_code=request.session.get('bank_ifsc_code'),
             bank_name=request.session.get('bank_name'),
@@ -312,7 +308,17 @@ def admission_review(request):
                 field_value=field['value'],
             )
 
-        # Store the new ID in session so we can show it on confirmation
+        # Move staged docs to permanent storage and save to DB
+        for doc in request.session.get('staged_docs', []):
+            staging_path = os.path.join(settings.MEDIA_ROOT, doc['path'])
+            if os.path.exists(staging_path):
+                ApplicationDocument.objects.create(
+                    application=application,
+                    title=doc['title'],
+                    file=doc['path'],
+                    is_mandatory=doc['is_mandatory'],
+                )
+
         request.session['new_applicant_id'] = beneficiary.applicant_id
         return redirect('application_submitted')
 
@@ -570,3 +576,91 @@ def admin_logout(request):
     request.session.pop('admin_logged_in', None)
     request.session.pop('admin_username', None)
     return redirect('admin_login')
+
+import os
+from django.conf import settings
+
+def admission_documents(request):
+
+    MANDATORY_DOCS = [
+        'cwc_certificate',
+        'aadhar_card',
+        'orphanage_certificate',
+        'pan_card',
+        'passport_photo',
+    ]
+
+    MANDATORY_LABELS = {
+        'cwc_certificate':       'CWC Certificate',
+        'aadhar_card':           'Aadhar Card',
+        'orphanage_certificate': 'Orphanage Certificate',
+        'pan_card':              'PAN Card',
+        'passport_photo':        'Passport Photo',
+    }
+
+    if request.method == "POST":
+        # Validate all mandatory docs are uploaded
+        missing = []
+        for key in MANDATORY_DOCS:
+            if key not in request.FILES:
+                missing.append(MANDATORY_LABELS[key])
+
+        if missing:
+            return render(request, 'accounts/admission_documents.html', {
+                'mandatory_labels': MANDATORY_LABELS,
+                'error': f"Please upload all required documents: {', '.join(missing)}"
+            })
+
+        # Save files to a temp staging folder using session key
+        session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
+
+        staging_dir = os.path.join(settings.MEDIA_ROOT, 'staging', session_key)
+        os.makedirs(staging_dir, exist_ok=True)
+
+        saved_docs = []
+
+        # Save mandatory docs
+        for key in MANDATORY_DOCS:
+            file = request.FILES[key]
+            file_path = os.path.join(staging_dir, f"{key}_{file.name}")
+            with open(file_path, 'wb+') as dest:
+                for chunk in file.chunks():
+                    dest.write(chunk)
+            saved_docs.append({
+                'title': MANDATORY_LABELS[key],
+                'path':  f"staging/{session_key}/{key}_{file.name}",
+                'is_mandatory': True,
+            })
+
+        # Save optional extra docs
+        extra_titles = request.POST.getlist('extra_doc_titles[]')
+        extra_files  = request.FILES.getlist('extra_doc_files[]')
+
+        for title, file in zip(extra_titles, extra_files):
+            title = title.strip()
+            if title and file:
+                file_path = os.path.join(staging_dir, f"extra_{file.name}")
+                with open(file_path, 'wb+') as dest:
+                    for chunk in file.chunks():
+                        dest.write(chunk)
+                saved_docs.append({
+                    'title': title,
+                    'path':  f"staging/{session_key}/extra_{file.name}",
+                    'is_mandatory': False,
+                })
+
+        request.session['staged_docs'] = saved_docs
+        return redirect('admission_review')
+
+    return render(request, 'accounts/admission_documents.html', {
+        'mandatory_labels': {
+            'cwc_certificate':       'CWC Certificate',
+            'aadhar_card':           'Aadhar Card',
+            'orphanage_certificate': 'Orphanage Certificate',
+            'pan_card':              'PAN Card',
+            'passport_photo':        'Passport Photo',
+        }
+    })

@@ -151,4 +151,7 @@ Things added:
 4. Bank details tab
 5. Admin profile visibility in audit logs (can see which admin performed which action)
 6. Search using name or enrollment ID in applied, verified and enrolled beneficiaries in the admin console
+Remaining:
+1. Upload documents by applicant - mandatory and optional both
+2. 5 categories of orphans  
 """
