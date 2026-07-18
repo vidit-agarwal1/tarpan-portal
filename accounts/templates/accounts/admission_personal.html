@@ -111,16 +111,37 @@
                     >
                 </div>
                 <div class="form-group">
-                    <label for="category">Category <span style = "color : red;">*</span> </label>
-                    <input 
-                        type="text" 
+                    <label for="category">
+                        Category <span style="color: red;">*</span>
+                    </label>
+                    <select
                         id="category"
-                        name="category" 
-                        class="form-control" 
-                        placeholder="e.g. General, OBC, SC, ST"
-                        value="{{ request.session.category|default:'' }}" 
+                        name="category"
+                        class="form-control"
                         required
                     >
+                        <option value="" disabled {% if not request.session.category %}selected{% endif %}>
+                            — Select your category —
+                        </option>
+                        <option value="Complete Orphan" {% if request.session.category == 'Complete Orphan' %}selected{% endif %}>
+                            Complete Orphan
+                        </option>
+                        <option value="Orphan with no parents, but has relatives" {% if request.session.category == 'Orphan with no parents, but has relatives' %}selected{% endif %}>
+                            Orphan with no parents, but has relatives
+                        </option>
+                        <option value="Children with one parent" {% if request.session.category == 'Children with one parent' %}selected{% endif %}>
+                            Children with one parent
+                        </option>
+                        <option value="Children of divorced parents" {% if request.session.category == 'Children of divorced parents' %}selected{% endif %}>
+                            Children of divorced parents
+                        </option>
+                        <option value="Children of parents suffering from a serious illness" {% if request.session.category == 'Children of parents suffering from a serious illness' %}selected{% endif %}>
+                            Children of parents suffering from a serious illness
+                        </option>
+                        <option value="Children under care and protection" {% if request.session.category == 'Children under care and protection' %}selected{% endif %}>
+                            Children under care and protection
+                        </option>
+                    </select>
                 </div>
             </div>
 
