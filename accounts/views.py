@@ -586,7 +586,6 @@ def admission_documents(request):
         'cwc_certificate',
         'aadhar_card',
         'orphanage_certificate',
-        'pan_card',
         'passport_photo',
     ]
 
