@@ -64,16 +64,26 @@
 
             <div class="grid-2">
                 <div class="form-group">
-                    <label for="gender">Gender <span style = "color : red;">*</span> </label>
-                    <input 
-                        type="text" 
+                    <label for="gender">Gender <span style="color: red;">*</span></label>
+                    <select
                         id="gender"
-                        name="gender" 
-                        class="form-control" 
-                        placeholder="e.g. Male, Female, Other"
-                        value="{{ request.session.gender|default:'' }}" 
+                        name="gender"
+                        class="form-control"
                         required
                     >
+                        <option value="" disabled {% if not request.session.gender %}selected{% endif %}>
+                            — Select your gender —
+                        </option>
+                        <option value="Male" {% if request.session.gender == 'Male' %}selected{% endif %}>
+                            Male
+                        </option>
+                        <option value="Female" {% if request.session.gender == 'Female' %}selected{% endif %}>
+                            Female
+                        </option>
+                        <option value="Prefer not to say" {% if request.session.gender == 'Prefer not to say' %}selected{% endif %}>
+                            Prefer not to say
+                        </option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="dob">Date of Birth <span style = "color : red;">*</span></label>

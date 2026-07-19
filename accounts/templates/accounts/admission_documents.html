@@ -60,11 +60,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label>PAN Card <span style="color: red;">*</span></label>
-                    <input type="file" name="pan_card" class="form-control" required>
-                </div>
-
-                <div class="form-group">
                     <label>Passport Photo <span style="color: red;">*</span></label>
                     <input type="file" name="passport_photo" class="form-control" accept="image/*" required>
                 </div>
@@ -79,6 +74,29 @@
                 <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 1.25rem;">
                     You may also upload other supporting documents such as Birth Certificate, 10th/12th Leaving Certificate, Ration Card, etc.
                 </p>
+
+                <div style="background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 500;">
+                            PAN Card
+                            <span class="text-muted" style="font-size: 0.78rem; font-weight: 400;">(Optional but recommended)</span>
+                        </label>
+                    </div>
+                    <input
+                        type="text"
+                        name="extra_doc_titles[]"
+                        class="form-control"
+                        value="PAN Card"
+                        style="margin-bottom: 0.5rem; display: none;"
+                    >
+                    <label style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 0.25rem;">File</label>
+                    <input
+                        type="file"
+                        name="extra_doc_files[]"
+                        class="form-control"
+                        style="font-size: 0.85rem;"
+                    >
+                </div>
 
                 <div id="extra-docs-container" style="margin-bottom: 1rem;"></div>
 
